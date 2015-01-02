@@ -1,3 +1,4 @@
+#Makes a SpaceBlasters Games
 import pygame
 import random
 
@@ -163,6 +164,16 @@ def space_ship(x,y):
     pygame.draw.polygon(gameDisplay,red,((x+19,y-9),(x+35,y+5),(x+23,y+5),(x+18,y)))#Right Wing
     pygame.draw.circle(gameDisplay,grey,(int(x+7),int(y-34)),3)
 
+def easy_ship(x,y):
+    enemy_height = 32
+    pygame.draw.circle(gameDisplay,light_green,(x,y),enemy_height)
+    pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_height/1.5))
+    pygame.draw.circle(gameDisplay,light_yellow,(x,y),int(enemy_height/2.5))
+    pygame.draw.rect(gameDisplay,green,(int(x-enemy_height/1.5),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Left square
+    pygame.draw.rect(gameDisplay,green,(int(x+enemy_height/3.1),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Eight square
+    pygame.draw.rect(gameDisplay,green,(int(x-enemy_height*0.15),int(y+enemy_height/3.1),int(enemy_height/2.8),int(enemy_height/2.8)))#Bottom square
+    pygame.draw.rect(gameDisplay,green,(int(x-enemy_height*0.15),int(y-enemy_height/1.5),int(enemy_height/2.8),int(enemy_height/2.8)))#Top Sqaure
+
 def fire(list):
     laser_width = 5
     laser_height = 20
@@ -170,15 +181,19 @@ def fire(list):
     for loc in list:
         pygame.draw.rect(gameDisplay,light_red,(loc[0] + laser_width,loc[1]-50-laser_height,laser_width,laser_height))
 
+def health_bar(hp):
+    for i in range(hp):
+        pygame.draw.rect(gameDisplay,light_blue,(display_width-20,25*(i)+15 ,15,15))
+
 #Better to start the game from function
 def game_loop():
     game_exit = False
     game_over = False
-    FPS = 20
+    FPS = 50
 
-    player_lives = 3
+    player_hp = 10
     space_ship_x = display_width * 0.5
-    space_ship_y = display_height * 0.98
+    space_ship_y = display_height * 0.99
     move_x = 0
     move_y = 0
 
@@ -190,6 +205,12 @@ def game_loop():
             if event.type == pygame.QUIT:#Checks if u click exit button
                 pygame.quit()
                 quit()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    move_x = 0
+                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    move_y = 0
 
             #When the key is pressed
             if event.type == pygame.KEYDOWN:#Moves object
@@ -207,11 +228,6 @@ def game_loop():
                     loc_fire.append(space_ship_y)
                     list_fire.append(loc_fire)
 
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    move_x = 0
-                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    move_y = 0
 
         space_ship_x += move_x
         space_ship_y += move_y
@@ -221,13 +237,21 @@ def game_loop():
         elif space_ship_x + display_width * 0.045> display_width:
             space_ship_x = display_width * 0.955
 
-        if space_ship_y > display_height * 0.98:
-            space_ship_y = display_height * 0.98
+        if space_ship_y > display_height * 0.99:
+            space_ship_y = display_height * 0.99
+        elif space_ship_y - display_height * 0.07 <0:
+            space_ship_y = display_height * 0.07
 
         for loc in list_fire:
             loc[1] = loc[1] - 5
+            if loc[1] < 75:
+                del list_fire[0]
 
         game_stars()
+
+        easy_ship(500,100)
+        health_bar(player_hp)
+
         fire(list_fire)
         space_ship(space_ship_x,space_ship_y)
 
