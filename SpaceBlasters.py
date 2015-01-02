@@ -12,6 +12,8 @@ red = (200,0,0)#red,green,blue
 light_red = (255,0,0)
 blue = (0,0,255)#red,green,blue
 light_blue = (0,162,232)
+violet = (53,0,106)
+dark_violet = (46,0,91)
 yellow = (200,200,0)
 light_yellow = (255,255,0)
 green = (34,177,76)
@@ -167,20 +169,20 @@ def space_ship(x,y):
 def easy_enemies(x,y):
     enemy_height = 32
 
-    pygame.draw.circle(gameDisplay,light_green,(x,y),enemy_height)
+    pygame.draw.circle(gameDisplay,violet,(x,y),enemy_height)
     pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_height/1.5))
-    pygame.draw.circle(gameDisplay,light_yellow,(x,y),int(enemy_height/2.5))
-    pygame.draw.rect(gameDisplay,green,(int(x-enemy_height/1.5),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Left square
-    pygame.draw.rect(gameDisplay,green,(int(x+enemy_height/3.1),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Eight square
-    pygame.draw.rect(gameDisplay,green,(int(x-enemy_height*0.15),int(y+enemy_height/3.1),int(enemy_height/2.8),int(enemy_height/2.8)))#Bottom square
-    pygame.draw.rect(gameDisplay,green,(int(x-enemy_height*0.15),int(y-enemy_height/1.5),int(enemy_height/2.8),int(enemy_height/2.8)))#Top Sqaure
+    pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_height/2.5))
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_height/1.5),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Left square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x+enemy_height/3.1),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Eight square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_height*0.15),int(y+enemy_height/3.1),int(enemy_height/2.8),int(enemy_height/2.8)))#Bottom square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_height*0.15),int(y-enemy_height/1.5),int(enemy_height/2.8),int(enemy_height/2.8)))#Top Sqaure
 
 def fire(list):
     laser_width = 5
     laser_height = 20
 
     for loc in list:
-        pygame.draw.rect(gameDisplay,light_red,(loc[0] + laser_width,loc[1]-50-laser_height,laser_width,laser_height))
+        pygame.draw.rect(gameDisplay,blue,(loc[0] + laser_width,loc[1]-50-laser_height,laser_width,laser_height))
 
 def health_bar(hp):
     for i in range(hp):
@@ -190,14 +192,31 @@ def create_enemies(level):
     easy_enemies = []
     normal_enemies = []
     enemies = []
+    num_enemies = 1
+    wave_y = 180#Displacement per wave in y directions
+
+    easy_num = 0
+    normal_num = 0
 
     if level == 1:
-        for x in range(10):
+        easy_num = 10
+
+    for wave in range(easy_num):#Number of waves in each level
+        if wave>=8:
+            num_enemies = 3#Enemies per wave
+        elif wave >= 3:
+            num_enemies = 2
+        else:
+            num_enemies = 1
+        for num in range(num_enemies):
+            x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
+            y_loc = wave * - wave_y#Displacement per wave in y directions
             location = []
-            location.append(random.randrange(display_width * 0.05, display_width * 0.92))
-            location.append(60)
+            location.append(x_loc)
+            location.append(y_loc)
             easy_enemies.append(location)
-        enemies.append(easy_enemies)
+
+    enemies.append(easy_enemies)
 
     '''
     for x in range(5):
@@ -217,6 +236,7 @@ def level_create(easy_enemy,easy_vel):
         print("nothing")
     else:
         for loc in easy_enemy:
+            loc[1] = loc[1] + easy_vel
             easy_enemies(loc[0],loc[1])
 
 #Better to start the game from function
@@ -237,6 +257,7 @@ def game_loop():
     level = 1
     create_level = False
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
+    easy_vel = 1
 
     while not game_exit:
         gameDisplay.fill(black)
@@ -293,7 +314,7 @@ def game_loop():
         health_bar(player_hp)
 
         # enemies: [0] = easy_enemies, [1] = normal_enemies
-        level_create(enemies[0],5)
+        level_create(enemies[0],easy_vel)
 
         fire(list_fire)
         space_ship(space_ship_x,space_ship_y)
