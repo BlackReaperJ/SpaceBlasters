@@ -164,8 +164,9 @@ def space_ship(x,y):
     pygame.draw.polygon(gameDisplay,red,((x+19,y-9),(x+35,y+5),(x+23,y+5),(x+18,y)))#Right Wing
     pygame.draw.circle(gameDisplay,grey,(int(x+7),int(y-34)),3)
 
-def easy_ship(x,y):
+def easy_enemies(x,y):
     enemy_height = 32
+
     pygame.draw.circle(gameDisplay,light_green,(x,y),enemy_height)
     pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_height/1.5))
     pygame.draw.circle(gameDisplay,light_yellow,(x,y),int(enemy_height/2.5))
@@ -185,6 +186,39 @@ def health_bar(hp):
     for i in range(hp):
         pygame.draw.rect(gameDisplay,light_blue,(display_width-20,25*(i)+15 ,15,15))
 
+def create_enemies(level):
+    easy_enemies = []
+    normal_enemies = []
+    enemies = []
+
+    if level == 1:
+        for x in range(10):
+            location = []
+            location.append(random.randrange(display_width * 0.05, display_width * 0.92))
+            location.append(60)
+            easy_enemies.append(location)
+        enemies.append(easy_enemies)
+
+    '''
+    for x in range(5):
+        location = []
+        location.append(x)
+        location.append(x)
+        normal_enemies.append(location)
+    enemies.append(normal_enemies)
+
+    for x in enemies[1]:
+        print(x[0],x[1])
+    '''
+    return enemies
+
+def level_create(easy_enemy,easy_vel):
+    if easy_enemies == []:
+        print("nothing")
+    else:
+        for loc in easy_enemy:
+            easy_enemies(loc[0],loc[1])
+
 #Better to start the game from function
 def game_loop():
     game_exit = False
@@ -198,6 +232,11 @@ def game_loop():
     move_y = 0
 
     list_fire = []
+    vel_shot = 5
+
+    level = 1
+    create_level = False
+    enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
     while not game_exit:
         gameDisplay.fill(black)
@@ -222,12 +261,15 @@ def game_loop():
                     move_y = -5
                 elif event.key == pygame.K_DOWN :
                     move_y = 5
-                elif event.key == pygame.K_SPACE :
+                if event.key == pygame.K_SPACE :
                     loc_fire = []
                     loc_fire.append(space_ship_x)
                     loc_fire.append(space_ship_y)
                     list_fire.append(loc_fire)
 
+        if not create_level:
+            enemies = create_enemies(level)
+            create_level = True
 
         space_ship_x += move_x
         space_ship_y += move_y
@@ -243,14 +285,15 @@ def game_loop():
             space_ship_y = display_height * 0.07
 
         for loc in list_fire:
-            loc[1] = loc[1] - 5
+            loc[1] = loc[1] - vel_shot
             if loc[1] < 75:
                 del list_fire[0]
 
         game_stars()
-
-        easy_ship(500,100)
         health_bar(player_hp)
+
+        # enemies: [0] = easy_enemies, [1] = normal_enemies
+        level_create(enemies[0],5)
 
         fire(list_fire)
         space_ship(space_ship_x,space_ship_y)
