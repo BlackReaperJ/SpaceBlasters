@@ -1,5 +1,3 @@
-#Lesson for Pseudo 3D
-#Makes a basic snake game
 import pygame
 import random
 
@@ -8,6 +6,7 @@ pygame.init()#Initialize the modules in pygame
 white = (255,255,255)#Have to create ur colours in python
 black = (0,0,0)
 light_black = (30,30,30)
+grey = (50,50,50)
 red = (200,0,0)#red,green,blue
 light_red = (255,0,0)
 blue = (0,0,255)#red,green,blue
@@ -154,16 +153,22 @@ def game_intro():
 def space_ship(x,y):
     #Draws the body
     #1ST cor: head  3rd line: tail
-    pygame.draw.polygon(gameDisplay,light_black,((x+6,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+3,y-20),
+    pygame.draw.polygon(gameDisplay,light_black,((x+7,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+3,y-20),
                                            (x-3,y-20),(x-23,y-2),(x-23,y+5),(x-10,y+5),(x-5,y),(x-3,y+5),(x+3,y+6),
-                                           (x+6,y+13),(x+10,y+6),(x+15,y+5),(x+18,y),(x+23,y+5),(x+35,y+5),
+                                           (x+7,y+13),(x+10,y+6),(x+15,y+5),(x+18,y),(x+23,y+5),(x+35,y+5),
                                            (x+35,y-3),(x+15,y-20),(x+10,y-20),(x+10,y-30),(x+18,y-28),(x+18,y-30),
                                            (x+12,y-38)))
 
     pygame.draw.polygon(gameDisplay,red,((x-6,y-9),(x-23,y+5),(x-10,y+5),(x-5,y)))#Left Wing
     pygame.draw.polygon(gameDisplay,red,((x+19,y-9),(x+35,y+5),(x+23,y+5),(x+18,y)))#Right Wing
+    pygame.draw.circle(gameDisplay,grey,(int(x+7),int(y-34)),3)
 
+def fire(list):
+    laser_width = 5
+    laser_height = 20
 
+    for loc in list:
+        pygame.draw.rect(gameDisplay,light_red,(loc[0] + laser_width,loc[1]-50-laser_height,laser_width,laser_height))
 
 #Better to start the game from function
 def game_loop():
@@ -177,8 +182,10 @@ def game_loop():
     move_x = 0
     move_y = 0
 
-    while not game_exit:
+    list_fire = []
 
+    while not game_exit:
+        gameDisplay.fill(black)
         for event in pygame.event.get():#print(event)
             if event.type == pygame.QUIT:#Checks if u click exit button
                 pygame.quit()
@@ -194,6 +201,11 @@ def game_loop():
                     move_y = -5
                 elif event.key == pygame.K_DOWN :
                     move_y = 5
+                elif event.key == pygame.K_SPACE :
+                    loc_fire = []
+                    loc_fire.append(space_ship_x)
+                    loc_fire.append(space_ship_y)
+                    list_fire.append(loc_fire)
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -212,9 +224,11 @@ def game_loop():
         if space_ship_y > display_height * 0.98:
             space_ship_y = display_height * 0.98
 
-        gameDisplay.fill(black)
-        game_stars()
+        for loc in list_fire:
+            loc[1] = loc[1] - 5
 
+        game_stars()
+        fire(list_fire)
         space_ship(space_ship_x,space_ship_y)
 
         pygame.display.update()
