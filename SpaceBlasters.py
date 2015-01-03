@@ -153,6 +153,33 @@ def game_intro():
         pygame.display.update()
         clock.tick(15)#Frames per second, great graphics low fps, meh graphics high mid fps
 
+def gameover(score):
+    game_over = True
+
+    while game_over:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        gameDisplay.fill(black)
+        game_stars()
+        message_to_screen("Game Over!!",red,y_displace =-100,size = "large")
+        message_to_screen("Your total score is: " + str(score),blue,0,"medium")
+
+
+        button_width = 150
+        button_height = 75
+
+        #Make Buttons, pygame does not have buttons
+        button("Play Again", 12, 600, button_width, button_height,green, light_green, action = "play")
+        button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
+        button("High Scores", 362, 600, button_width, button_height, blue, light_blue,action = "highscore")
+        button("Quit", 537, 600, button_width, button_height, red, light_red,action = "quit")
+
+        pygame.display.update()
+        clock.tick(15)#Frames per second, great graphics low fps, meh graphics high mid fps
+
 def space_ship(x,y):
     #Draws the body
     #1ST cor: head  3rd line: tail
@@ -205,6 +232,18 @@ def player_fire_collision(list_fire,enemies,score):
                 break#need to break if a laser overlaps with 2 enemies at the same location
 
     return score
+
+def enemy_fires(enemy):
+    for loc in enemy:
+        pygame.draw.rect(gameDisplay,red,(loc[0],loc[1],laser_width,laser_height))
+
+def enemy_fire_collision(player,enemy_list_fire,player_hp):
+    for fire in enemy_list_fire:
+        laser = pygame.draw.rect(gameDisplay,red,(fire[0],fire[1],laser_width,laser_height))
+        if player.colliderect(laser):
+            player_hp = player_hp - 1
+            enemy_list_fire.remove(fire)
+    return player_hp
 
 def health_bar(hp):
     for i in range(hp):
@@ -300,8 +339,11 @@ def game_loop():
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
     easy_vel = 1
     normal_vel = 2
+    enemy_fire = 0
+    enemy_list_fire = []
 
     global enemy_easy_height
+    easy_enemy_fire = 50
     enemy_easy_height = 32
 
     while not game_exit:
@@ -345,6 +387,8 @@ def game_loop():
         space_ship_x += move_x
         space_ship_y += move_y
 
+        enemy_fire = (enemy_fire + 1) % 1000
+
         #Boundaries for x-direction
         if space_ship_x - display_width * 0.03 < 0:
             space_ship_x = display_width * 0.03
@@ -373,9 +417,27 @@ def game_loop():
         fire(list_fire)
         score = player_fire_collision(list_fire,enemies,score)
 
+        print(enemy_fire)
+        if enemy_fire % easy_enemy_fire == 0:#Firing for easy enemies
+            for loc in enemies[0]:
+                loc_fire = []
+                loc_fire.append(loc[0])
+                loc_fire.append(loc[1])
+                enemy_list_fire.append(loc_fire)
+
+        for loc in enemy_list_fire:
+            loc[1] = loc[1] + vel_shot
+            if loc[1] > display_height:
+                enemy_list_fire.remove(loc)
+
+        enemy_fires(enemy_list_fire)
         player = space_ship(space_ship_x,space_ship_y)
 
         enemies, player_hp = player_collision(player,enemies,player_hp)
+        player_hp = enemy_fire_collision(player,enemy_list_fire,player_hp)
+
+        if player_hp <= 0:
+            gameover(score)
 
         pygame.display.update()
         clock.tick(FPS)
