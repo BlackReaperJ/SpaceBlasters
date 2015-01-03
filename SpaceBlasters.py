@@ -192,7 +192,7 @@ def fire(list):
     for loc in list:
         pygame.draw.rect(gameDisplay,blue,(loc[0] + laser_width,loc[1]-50-laser_height,laser_width,laser_height))
 
-def player_fire_collision(list_fire,enemies):
+def player_fire_collision(list_fire,enemies,score):
     for fire in list_fire:
         for loc in enemies[0]:#Easy Enemies
             laser = pygame.draw.rect(gameDisplay,blue,(fire[0] + laser_width,fire[1]-50-laser_height,laser_width,laser_height))
@@ -200,12 +200,19 @@ def player_fire_collision(list_fire,enemies):
                 list_fire.remove(fire)
                 loc[2] = loc[2] - 1
                 if loc[2] <= 0:
+                    score =  score + 100
                     enemies[0].remove(loc)
+                break#need to break if a laser overlaps with 2 enemies at the same location
+
+    return score
 
 def health_bar(hp):
     for i in range(hp):
         pygame.draw.rect(gameDisplay,light_blue,(display_width-20,25*(i)+15 ,15,15))
 
+def display_score(score):
+    text = small_font.render("Score: " + str(score), True, white)
+    gameDisplay.blit(text, [0,0])
 
 def create_enemies(level, wave):#Creates the waves per level
     easy_enemies = []
@@ -273,7 +280,6 @@ def game_loop():
     game_over = False
     FPS = 50
 
-    global score
     score = 0
 
     player_hp = 10
@@ -357,6 +363,7 @@ def game_loop():
                 list_fire.remove(loc)
 
         game_stars()
+        display_score(score)
         health_bar(player_hp)
 
         # enemies: [0] = easy_enemies, [1] = normal_enemies
@@ -364,7 +371,7 @@ def game_loop():
         player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,player_hp)
 
         fire(list_fire)
-        player_fire_collision(list_fire,enemies)
+        score = player_fire_collision(list_fire,enemies,score)
 
         player = space_ship(space_ship_x,space_ship_y)
 
