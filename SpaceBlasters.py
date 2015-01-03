@@ -161,18 +161,35 @@ def game_intro():
 #Game Over screen of the game
 def gameover(score):
     game_over = True
-
+    name = ""
+    type = ""
+    num = 1
+    symbols = "!@#$%^&*():<>:?\/.,~\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     while game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
+            if event.type == pygame.KEYDOWN :
+                if event.key == pygame.K_BACKSPACE and len(name) > 0:
+                    name = name[:-1]
+                elif event.key == pygame.K_SPACE:
+                    name = name + " "
+                elif pygame.key.name(event.key) in symbols:
+                    name = name + pygame.key.name(event.key)
+
+        num = num +1
+        if num % 20 >= 10:
+            type = "|"
+        else:
+            type = ""
+
         gameDisplay.fill(black)
         game_stars()
         message_to_screen("Game Over!!",red,y_displace =-100,size = "large")
         message_to_screen("Your total score is: " + str(score),blue,0,"medium")
-
+        message_to_screen("Enter your name:"+ str(name) + type, blue, 60, "medium")
 
         button_width = 150
         button_height = 75
@@ -180,11 +197,11 @@ def gameover(score):
         #Make Buttons, pygame does not have buttons
         button("Play Again", 12, 600, button_width, button_height,green, light_green, action = "play")
         button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
-        button("High Scores", 362, 600, button_width, button_height, blue, light_blue,action = "highscore")
+        button("Submit Score", 362, 600, button_width, button_height, blue, light_blue,action = "submit")
         button("Quit", 537, 600, button_width, button_height, red, light_red,action = "quit")
 
         pygame.display.update()
-        clock.tick(15)#Frames per second, great graphics low fps, meh graphics high mid fps
+        clock.tick(20)#Frames per second, great graphics low fps, meh graphics high mid fps
 
 #Creates the players space_ship
 def space_ship(x,y):
@@ -312,7 +329,6 @@ def create_enemies(level, wave):
         enemies.append(random_enemy)
 
     print(enemies)
-    print(enemies[1])
     '''
     for x in range(5):
         location = []
