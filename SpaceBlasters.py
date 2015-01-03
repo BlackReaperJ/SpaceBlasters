@@ -156,7 +156,7 @@ def game_intro():
 def space_ship(x,y):
     #Draws the body
     #1ST cor: head  3rd line: tail
-    pygame.draw.polygon(gameDisplay,light_black,((x+7,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+3,y-20),
+    player = pygame.draw.polygon(gameDisplay,light_black,((x+7,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+3,y-20),
                                            (x-3,y-20),(x-23,y-2),(x-23,y+5),(x-10,y+5),(x-5,y),(x-3,y+5),(x+3,y+6),
                                            (x+7,y+13),(x+10,y+6),(x+15,y+5),(x+18,y),(x+23,y+5),(x+35,y+5),
                                            (x+35,y-3),(x+15,y-20),(x+10,y-20),(x+10,y-30),(x+18,y-28),(x+18,y-30),
@@ -166,29 +166,48 @@ def space_ship(x,y):
     pygame.draw.polygon(gameDisplay,red,((x+19,y-9),(x+35,y+5),(x+23,y+5),(x+18,y)))#Right Wing
     pygame.draw.circle(gameDisplay,grey,(int(x+7),int(y-34)),3)
 
-def easy_enemies(x,y):
-    enemy_height = 32
+    return player
 
-    pygame.draw.circle(gameDisplay,violet,(x,y),enemy_height)
-    pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_height/1.5))
-    pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_height/2.5))
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_height/1.5),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Left square
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x+enemy_height/3.1),int(y-enemy_height*0.15),int(enemy_height/2.8),int(enemy_height/2.8)))#Eight square
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_height*0.15),int(y+enemy_height/3.1),int(enemy_height/2.8),int(enemy_height/2.8)))#Bottom square
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_height*0.15),int(y-enemy_height/1.5),int(enemy_height/2.8),int(enemy_height/2.8)))#Top Sqaure
+def player_collision(player,enemies, player_hp):
+    for loc in enemies[0]:#Collision for easy_enemies
+        if player.colliderect(int(loc[0]-enemy_easy_height),int(loc[1]-enemy_easy_height),enemy_easy_height*2,enemy_easy_height*2):
+            player_hp = player_hp - 1
+            enemies[0].remove(loc)
+
+    return enemies, player_hp
+
+def easy_enemies(x,y, lives):
+    pygame.draw.circle(gameDisplay,violet,(x,y),enemy_easy_height)
+    pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_easy_height/1.5))
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height/1.5),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Left square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x+enemy_easy_height/3.1),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Eight square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y+enemy_easy_height/3.1),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Bottom square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y-enemy_easy_height/1.5),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Top Sqaure
+    pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_easy_height/2.5))
+
+    if lives == 1:
+        pygame.draw.circle(gameDisplay,blue,(x,y),int(enemy_easy_height/2.5))
 
 def fire(list):
-    laser_width = 5
-    laser_height = 20
-
     for loc in list:
         pygame.draw.rect(gameDisplay,blue,(loc[0] + laser_width,loc[1]-50-laser_height,laser_width,laser_height))
+
+def player_fire_collision(list_fire,enemies):
+    for fire in list_fire:
+        for loc in enemies[0]:#Easy Enemies
+            laser = pygame.draw.rect(gameDisplay,blue,(fire[0] + laser_width,fire[1]-50-laser_height,laser_width,laser_height))
+            if laser.colliderect(int(loc[0]-enemy_easy_height),int(loc[1]-enemy_easy_height),enemy_easy_height*2,enemy_easy_height*2):
+                list_fire.remove(fire)
+                loc[2] = loc[2] - 1
+                if loc[2] <= 0:
+                    enemies[0].remove(loc)
 
 def health_bar(hp):
     for i in range(hp):
         pygame.draw.rect(gameDisplay,light_blue,(display_width-20,25*(i)+15 ,15,15))
 
-def create_enemies(level, wave):
+
+def create_enemies(level, wave):#Creates the waves per level
     easy_enemies = []
     normal_enemies = []
     enemies = []
@@ -197,6 +216,8 @@ def create_enemies(level, wave):
 
     easy_num = []
     normal_num = []
+
+    easy_lives = 2
 
     if level == 1:
         easy_num = [1,1,1,2,2,2,2,2,3,3]
@@ -208,6 +229,7 @@ def create_enemies(level, wave):
         location = []
         location.append(x_loc)
         location.append(y_loc)
+        location.append(easy_lives)
         easy_enemies.append(location)#Add easy_enemy to list
 
     #enemies list is a list of all enemies
@@ -234,10 +256,10 @@ def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,player_hp):
         for loc in easy_enemy:
             loc[1] = loc[1] + easy_vel
             if loc[1] > display_height:
-                del easy_enemy[0]
+                easy_enemy.remove(loc)
                 player_hp = player_hp -1#Losses life if spaceship gets past the end
                 continue
-            easy_enemies(loc[0],loc[1])
+            easy_enemies(loc[0],loc[1],loc[2])
 
     #if normal_enemies == []:
     #    print("nothing")
@@ -251,6 +273,9 @@ def game_loop():
     game_over = False
     FPS = 50
 
+    global score
+    score = 0
+
     player_hp = 10
     space_ship_x = display_width * 0.5
     space_ship_y = display_height * 0.99
@@ -259,13 +284,19 @@ def game_loop():
 
     list_fire = []
     vel_shot = 5
+    global laser_width,laser_height
+    laser_width = 5
+    laser_height = 20
 
     level = 1
     wave = 1
     create_wave = True
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
-    easy_vel = 20
+    easy_vel = 1
     normal_vel = 2
+
+    global enemy_easy_height
+    enemy_easy_height = 32
 
     while not game_exit:
         gameDisplay.fill(black)
@@ -290,7 +321,7 @@ def game_loop():
                     move_y = -5
                 elif event.key == pygame.K_DOWN :
                     move_y = 5
-                if event.key == pygame.K_SPACE :
+                if event.key == pygame.K_SPACE :#Fires lasers
                     loc_fire = []
                     loc_fire.append(space_ship_x)
                     loc_fire.append(space_ship_y)
@@ -304,7 +335,7 @@ def game_loop():
             create_wave = False
 
 
-
+        #Moves Spaceship
         space_ship_x += move_x
         space_ship_y += move_y
 
@@ -323,16 +354,21 @@ def game_loop():
         for loc in list_fire:
             loc[1] = loc[1] - vel_shot
             if loc[1] < 75:
-                del list_fire[0]
+                list_fire.remove(loc)
 
         game_stars()
         health_bar(player_hp)
 
         # enemies: [0] = easy_enemies, [1] = normal_enemies
+        # [][0] = xPos, [][1] = yPos, [][2] = life
         player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,player_hp)
 
         fire(list_fire)
-        space_ship(space_ship_x,space_ship_y)
+        player_fire_collision(list_fire,enemies)
+
+        player = space_ship(space_ship_x,space_ship_y)
+
+        enemies, player_hp = player_collision(player,enemies,player_hp)
 
         pygame.display.update()
         clock.tick(FPS)
