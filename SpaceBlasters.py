@@ -42,11 +42,13 @@ for i in range(num_stars):
      location.append(random.randrange(0.02 * display_height, 0.98*display_height))
      stars.append(location)
 
+#Draws the stars in the background
 def game_stars():
     for loc in stars:
         loc[1] = (loc[1] + 1) % display_height
         pygame.draw.circle(gameDisplay,white,(loc[0],loc[1]),2)
 
+#Creates the size of the text
 def text_objects(text,color,size):#Use to center text
     if size == "small":
         text_surface = small_font.render(text, True, color)
@@ -56,7 +58,7 @@ def text_objects(text,color,size):#Use to center text
         text_surface = large_font.render(text, True, color)
     return text_surface, text_surface.get_rect()#Returns the surface and rectangle of the surface
 
-
+#Centers text on the button
 def text_to_button(msg,color, button_x, button_y, button_width, button_height, size = "small"):
     text_surf, text_rect = text_objects(msg,color,size)
     #Formula to find formula oof center of button
@@ -70,6 +72,7 @@ def message_to_screen(msg,color, y_displace = 0, size = "small"):
     text_rect.center = (display_width/2), (display_height /2) + y_displace#Centers the text
     gameDisplay.blit(text_surf, text_rect)
 
+#Creates a Button
 def button(text, x, y, width, height, inactive_color, active_color, action= None):
     #3rd param(xLoc,yLoc,width,height)
     cur = pygame.mouse.get_pos()# gets x,y of mouse location in a tuple
@@ -94,6 +97,7 @@ def button(text, x, y, width, height, inactive_color, active_color, action= None
 
     text_to_button(text,black,x,y,width,height)
 
+#Creates a game_controls title page for the game
 def game_controls():
     game_cont = True
     while game_cont:
@@ -124,6 +128,7 @@ def game_controls():
         pygame.display.update()
         clock.tick(10)
 
+#The main menu for the game
 def game_intro():
     for i in range(2):
         clock.tick(15)
@@ -153,6 +158,7 @@ def game_intro():
         pygame.display.update()
         clock.tick(15)#Frames per second, great graphics low fps, meh graphics high mid fps
 
+#Game Over screen of the game
 def gameover(score):
     game_over = True
 
@@ -180,6 +186,7 @@ def gameover(score):
         pygame.display.update()
         clock.tick(15)#Frames per second, great graphics low fps, meh graphics high mid fps
 
+#Creates the players space_ship
 def space_ship(x,y):
     #Draws the body
     #1ST cor: head  3rd line: tail
@@ -195,6 +202,7 @@ def space_ship(x,y):
 
     return player
 
+#If the players ship collides with the enemies ship
 def player_collision(player,enemies, player_hp):
     for loc in enemies[0]:#Collision for easy_enemies
         if player.colliderect(int(loc[0]-enemy_easy_height),int(loc[1]-enemy_easy_height),enemy_easy_height*2,enemy_easy_height*2):
@@ -203,6 +211,7 @@ def player_collision(player,enemies, player_hp):
 
     return enemies, player_hp
 
+#Creates the easy enemies for the game
 def easy_enemies(x,y, lives):
     pygame.draw.circle(gameDisplay,violet,(x,y),enemy_easy_height)
     pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_easy_height/1.5))
@@ -210,16 +219,27 @@ def easy_enemies(x,y, lives):
     pygame.draw.rect(gameDisplay,dark_violet,(int(x+enemy_easy_height/3.1),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Eight square
     pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y+enemy_easy_height/3.1),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Bottom square
     pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y-enemy_easy_height/1.5),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Top Sqaure
-    pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_easy_height/2.5))
 
     if lives == 1:
         pygame.draw.circle(gameDisplay,blue,(x,y),int(enemy_easy_height/2.5))
+    else:
+        pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_easy_height/2.5))
 
+#Draws the players laser shots
 def fire(list):
     for loc in list:
         pygame.draw.rect(gameDisplay,blue,(loc[0] + laser_width,loc[1]-50-laser_height,laser_width,laser_height))
 
-def player_fire_collision(list_fire,enemies,score):
+#Players Laser Collision for enemy laser and enemies
+def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
+    for fire in list_fire:
+        laser = pygame.draw.rect(gameDisplay,blue,(fire[0] + laser_width,fire[1]-50-laser_height,laser_width,laser_height))
+        for enemy_fire in enemy_list_fire:
+            if laser.colliderect(enemy_fire[0],enemy_fire[1],laser_width,laser_height):
+                list_fire.remove(fire)
+                enemy_list_fire.remove(enemy_fire)
+                break
+
     for fire in list_fire:
         for loc in enemies[0]:#Easy Enemies
             laser = pygame.draw.rect(gameDisplay,blue,(fire[0] + laser_width,fire[1]-50-laser_height,laser_width,laser_height))
@@ -233,10 +253,12 @@ def player_fire_collision(list_fire,enemies,score):
 
     return score
 
+#Draws the enemies lasers
 def enemy_fires(enemy):
     for loc in enemy:
         pygame.draw.rect(gameDisplay,red,(loc[0],loc[1],laser_width,laser_height))
 
+#Enemy laser collision for the player and reduces hp of player if true
 def enemy_fire_collision(player,enemy_list_fire,player_hp):
     for fire in enemy_list_fire:
         laser = pygame.draw.rect(gameDisplay,red,(fire[0],fire[1],laser_width,laser_height))
@@ -245,17 +267,21 @@ def enemy_fire_collision(player,enemy_list_fire,player_hp):
             enemy_list_fire.remove(fire)
     return player_hp
 
+#Draws the hp bar
 def health_bar(hp):
     for i in range(hp):
         pygame.draw.rect(gameDisplay,light_blue,(display_width-20,25*(i)+15 ,15,15))
 
+#Displays the score on the screen
 def display_score(score):
     text = small_font.render("Score: " + str(score), True, white)
     gameDisplay.blit(text, [0,0])
 
-def create_enemies(level, wave):#Creates the waves per level
+#Creates the enemies per waves per level
+def create_enemies(level, wave):
     easy_enemies = []
     normal_enemies = []
+    enemy_waves = []
     enemies = []
     num_enemies = 1
     waves = 0
@@ -268,20 +294,25 @@ def create_enemies(level, wave):#Creates the waves per level
     if level == 1:
         easy_num = [1,1,1,2,2,2,2,2,3,3]
 
+    enemy_waves.append(easy_num)
+    enemy_waves.append(normal_num)
 
-    for x in range(easy_num[wave-1]):#Creates Easy Enemies per wave
-        x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
-        y_loc = -20
-        location = []
-        location.append(x_loc)
-        location.append(y_loc)
-        location.append(easy_lives)
-        easy_enemies.append(location)#Add easy_enemy to list
+    for x in range(len(enemy_waves)):
+        random_enemy = []
+        if len(enemy_waves[x]) != 0:
+            for y in range(enemy_waves[x][wave-1]):#Creates Easy Enemies per wave
+                x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
+                y_loc = -20
+                location = []
+                location.append(x_loc)
+                location.append(y_loc)
+                location.append(easy_lives)#Have to change this when adding normal_minions
+                random_enemy.append(location)#Add easy_enemy to list
 
-    #enemies list is a list of all enemies
-    enemies.append(easy_enemies)
-    enemies.append(normal_enemies)
+        enemies.append(random_enemy)
+
     print(enemies)
+    print(enemies[1])
     '''
     for x in range(5):
         location = []
@@ -330,7 +361,7 @@ def game_loop():
     list_fire = []
     vel_shot = 5
     global laser_width,laser_height
-    laser_width = 5
+    laser_width = 7#originally 5
     laser_height = 20
 
     level = 1
@@ -345,6 +376,7 @@ def game_loop():
     global enemy_easy_height
     easy_enemy_fire = 50
     enemy_easy_height = 32
+    easy_vel_shot = 5
 
     while not game_exit:
         gameDisplay.fill(black)
@@ -415,9 +447,8 @@ def game_loop():
         player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,player_hp)
 
         fire(list_fire)
-        score = player_fire_collision(list_fire,enemies,score)
+        score = player_fire_collision(list_fire,enemies,score,enemy_list_fire)
 
-        print(enemy_fire)
         if enemy_fire % easy_enemy_fire == 0:#Firing for easy enemies
             for loc in enemies[0]:
                 loc_fire = []
@@ -426,7 +457,7 @@ def game_loop():
                 enemy_list_fire.append(loc_fire)
 
         for loc in enemy_list_fire:
-            loc[1] = loc[1] + vel_shot
+            loc[1] = loc[1] + easy_vel_shot
             if loc[1] > display_height:
                 enemy_list_fire.remove(loc)
 
