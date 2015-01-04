@@ -298,6 +298,10 @@ def normal_enemies(x,y,lives = 1):
     #pod
     pygame.draw.circle(gameDisplay,light_blue,(x,y+int(part_y*0.7575)),int(part_x/7))
 
+def hard_enemies(x,y,lives = 2):
+    x = int(x)
+    y = int(y)
+
 
 #Draws the players laser shots
 def fire(list):
@@ -397,6 +401,8 @@ def level_display(level):
 
         if level == 1:
             easy_enemies(505, 175)
+            normal_enemies(575, 175)
+            hard_enemies(645, 175)
             speed = "Slow"
             rate = "Normal"
             lives = 2
@@ -407,6 +413,12 @@ def level_display(level):
             rate = "None"
             lives = 1
             unique = "Can't Shoot"
+        elif level == 2:
+            hard_enemies(505, 175)
+            speed = "Very Slow"
+            rate = "Normal"
+            lives = 2
+            unique = "AI"
 
         text = med_font.render("Speed: " + speed, True, red)
         gameDisplay.blit(text, [100,290])
@@ -478,8 +490,10 @@ def create_enemies(level, wave):
 
     return enemies
 
-def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,player_hp):
+def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,player_hp,delay):
     wave_complete = False
+    if delay == 1:
+            normal_vel = normal_vel + 1
 
     if easy_enemy != []:
         for loc in easy_enemy:
@@ -532,9 +546,9 @@ def game_loop():
     waves_per_level = [15,16,15]
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
-
     enemy_fire = 0
     enemy_list_fire = []
+    delay = 0 #for 0.5 vel shots
 
     global enemy_easy_height
     enemy_easy_height = 32
@@ -546,7 +560,7 @@ def game_loop():
     global enemy_norm_width
     enemy_norm_height = 64
     enemy_norm_width = 52
-    normal_vel = 4
+    normal_vel = 3#This is actually 3.5
 
     while not game_exit:
         for event in pygame.event.get():#print(event)
@@ -600,6 +614,7 @@ def game_loop():
         space_ship_y += move_y
 
         enemy_fire = (enemy_fire + 1) % 1000
+        delay = (delay + 1) % 2
 
         #Boundaries for x-direction
         if space_ship_x - display_width * 0.03 < 0:
@@ -627,7 +642,7 @@ def game_loop():
 
         # enemies: [0] = easy_enemies, [1] = normal_enemies
         # [][0] = xPos, [][1] = yPos, [][2] = life
-        player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,player_hp)
+        player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,player_hp,delay)
         ai_move(enemies[1],list_fire)
 
         if enemy_fire % easy_rate_fire == 0:#Firing for easy enemies
