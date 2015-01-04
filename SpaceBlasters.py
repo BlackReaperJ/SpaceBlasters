@@ -104,6 +104,28 @@ def button(text, x, y, width, height, inactive_color, active_color, action= None
     text_to_button(text,black,x,y,width,height)
     return(True)
 
+def pause():
+    paused = True
+
+    message_to_screen("Paused",white,-100,size = "large")
+    message_to_screen("Press C to continue or Q to quit!",white,25,size = "small")
+    pygame.display.update()
+
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    paused = False
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+
+        clock.tick(5)
+
 #Creates a game_controls title page for the game
 def game_controls():
     game_cont = True
@@ -117,11 +139,12 @@ def game_controls():
         gameDisplay.fill(black)
         game_stars()
         message_to_screen("Controls",light_red,y_displace =-275,size = "large")
-        message_to_screen("Move SpaceShip: Arrow Keys",blue,-80,"medium")
-        message_to_screen("Fire: Spacebar",blue,-20,"medium")
-        message_to_screen("Pause: P",blue,40,"medium")
-        message_to_screen("Kill Enemies to increase score!",blue,100,"medium")
-        message_to_screen("Beat lvl 10 to win the game",blue,160,"medium")
+        message_to_screen("Move SpaceShip: Arrow Keys",blue,-180,"medium")
+        message_to_screen("Fire: Spacebar",blue,-120,"medium")
+        message_to_screen("Pause: P",blue,-60,"medium")
+        message_to_screen("Kill Enemies to Increase Score!",blue,0,"medium")
+        message_to_screen("Hp Restored After Each Level",blue,60,"medium")
+        message_to_screen("Beat lvl 10 to win the game",blue,120,"medium")
 
         button_width = 150
         button_height = 75
@@ -354,6 +377,7 @@ def level_display(level):
     display_level = True
     speed = ""
     rate = ""
+    unique = ""
     lives = 0
 
     while display_level:
@@ -366,28 +390,32 @@ def level_display(level):
         gameDisplay.fill(black)
         game_stars()
 
-        message_to_screen("Level   " + str(level),blue,-250,"large")
+        message_to_screen("Level " + str(level),blue,-290,"large")
         text = med_font.render("New Enemy: ->", True, red)
-        gameDisplay.blit(text, [120,190])
-        message_to_screen("Enemy Statistics",blue,0,"medium")
+        gameDisplay.blit(text, [150,140])
+        message_to_screen("Enemy Statistics",blue,-100,"medium")
 
         if level == 1:
-            easy_enemies(475, 225)
-            speed = "Very Slow"
+            easy_enemies(505, 175)
+            speed = "Slow"
             rate = "Normal"
             lives = 2
+            unique = "None"
         elif level == 2:
-            normal_enemies(475, 225)
-            speed = "Slow"
-            rate = "Very Slow"
-            lives = 2
+            normal_enemies(505, 175)
+            speed = "Fast"
+            rate = "None"
+            lives = 1
+            unique = "Can't Shoot"
 
-        text = med_font.render("Speed:" + speed, True, red)
-        gameDisplay.blit(text, [150,390])
-        text = med_font.render("Rate of Fire:"+rate, True, red)
-        gameDisplay.blit(text, [150,460])
-        text = med_font.render("Lives:" +str(lives), True, red)
-        gameDisplay.blit(text, [150,530])
+        text = med_font.render("Speed: " + speed, True, red)
+        gameDisplay.blit(text, [100,290])
+        text = med_font.render("Rate of Fire: "+rate, True, red)
+        gameDisplay.blit(text, [100,360])
+        text = med_font.render("Lives: " +str(lives), True, red)
+        gameDisplay.blit(text, [100,430])
+        text = med_font.render("Unique: " +str(unique), True, red)
+        gameDisplay.blit(text, [100,500])
 
         display_level = button("Ready",300,600,button_width,button_height,blue,light_blue,"ready")
         pygame.display.update()
@@ -402,17 +430,18 @@ def create_enemies(level, wave):
     enemies = []
     waves = 0
     num_enemy = 0
+    next_enemy = 0
 
     easy_num = []
     normal_num = []
 
-    easy_lives = 2
-    print(str(level), str(wave))
+    lives = [2,1]
+
     if level == 1:
         easy_num = [1,2,2,3,3,3,4,4,4,5,5,5,6,6,7]
     elif level == 2:
-        easy_num =   [0,2,1,1,2,1,0,3,2,2,4,3,3,4,2]
-        normal_num = [1,0,1,1,1,2,3,1,2,1,2,2,2,2,3]
+        easy_num =   [0,1,0,2,3,2,0,3,4,1,2,5,3,4,6,4]
+        normal_num = [1,1,2,1,1,2,3,2,2,3,3,2,3,3,2,3]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
@@ -438,11 +467,12 @@ def create_enemies(level, wave):
                 location = []
                 location.append(x_loc)
                 location.append(y_loc)
-                location.append(easy_lives)#Have to change this when adding normal_minions
+                location.append(lives[next_enemy])#Have to change this when adding normal_minions
                 random_enemy.append(location)#Add easy_enemy to list
                 row_enemy.append(location)
                 num_enemy = num_enemy + 1
 
+            next_enemy = next_enemy + 1
         enemies.append(random_enemy)
     print(enemies)
 
@@ -499,7 +529,7 @@ def game_loop():
     display_level = True
     wave = 1
     create_wave = True
-    waves_per_level = [15,15,15]
+    waves_per_level = [15,16,15]
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
 
@@ -516,12 +546,9 @@ def game_loop():
     global enemy_norm_width
     enemy_norm_height = 64
     enemy_norm_width = 52
-    normal_rate_fire = 100 #Increase: Slows rate Decrease: Increases rate
-    normal_vel = 2
-    normal_vel_shot = 3
+    normal_vel = 4
 
     while not game_exit:
-        gameDisplay.fill(black)
         for event in pygame.event.get():#print(event)
             if event.type == pygame.QUIT:#Checks if u click exit button
                 pygame.quit()
@@ -543,13 +570,19 @@ def game_loop():
                     move_y = -5
                 elif event.key == pygame.K_DOWN :
                     move_y = 5
+                elif event.key == pygame.K_p:
+                    pause()
                 if event.key == pygame.K_SPACE :#Fires lasers
                     loc_fire = []
                     loc_fire.append(space_ship_x)
                     loc_fire.append(space_ship_y)
                     list_fire.append(loc_fire)
 
+        gameDisplay.fill(black)
+
         if display_level:
+            wave = 1
+            player_hp = 10
             level_display(level)
             display_level = False
             create_wave = True
@@ -560,7 +593,6 @@ def game_loop():
             if wave == waves_per_level[level-1]:
                 display_level = True
                 level = level + 1
-                wave = 1
             create_wave = False
 
         #Moves Spaceship
@@ -605,7 +637,7 @@ def game_loop():
                     loc_fire.append(loc[0])
                     loc_fire.append(loc[1])
                     enemy_list_fire.append(loc_fire)
-
+        '''
         if enemy_fire % normal_rate_fire == 0:#Firing for normal enemies
             for loc in enemies[1]:
                 if loc[1] > 0:
@@ -613,6 +645,7 @@ def game_loop():
                     loc_fire.append(loc[0])
                     loc_fire.append(loc[1])
                     enemy_list_fire.append(loc_fire)
+        '''
 
         for loc in enemy_list_fire:
             loc[1] = loc[1] + easy_vel_shot
