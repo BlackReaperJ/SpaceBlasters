@@ -336,7 +336,6 @@ def enemy_fire_collision(player,enemy_list_fire,player_hp):
     return player_hp
 
 def ai_move(norm_enemy,list_fire):
-    print(list_fire)
     for fire in list_fire:
         for enemy in norm_enemy:
             pass
@@ -402,32 +401,47 @@ def create_enemies(level, wave):
     enemy_waves = []
     enemies = []
     waves = 0
+    num_enemy = 0
 
     easy_num = []
     normal_num = []
 
     easy_lives = 2
-
+    print(str(level), str(wave))
     if level == 1:
-        easy_num = [1,1,1,2,2,2,2,2,3,3]
+        easy_num = [1,2,2,3,3,3,4,4,4,5,5,5,6,6,7]
     elif level == 2:
-        easy_num =   [0,0,1,1,0,0,2,2,1,1]
-        normal_num = [1,1,1,1,2,2,1,1,2,2]
+        easy_num =   [0,2,1,1,2,1,0,3,2,2,4,3,3,4,2]
+        normal_num = [1,0,1,1,1,2,3,1,2,1,2,2,2,2,3]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
+
+    row_enemy = []
 
     for x in range(len(enemy_waves)):
         random_enemy = []
         if len(enemy_waves[x]) != 0:
             for y in range(enemy_waves[x][wave-1]):#Creates Easy Enemies per wave
                 x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
-                y_loc = -20
+                y_loc = int(-20 - 100 * int(num_enemy /3))
+
+
+                if num_enemy % 3 == 1:
+                    while row_enemy[-1][0] + 0.15 * display_width > x_loc > row_enemy[-1][0] - 0.15 * display_width:
+                        x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
+
+                if num_enemy % 3 == 2:
+                    while row_enemy[-1][0] + 0.15 * display_width > x_loc > row_enemy[-1][0] - 0.15 * display_width or row_enemy[-2][0] + 0.15 * display_width > x_loc > row_enemy[-2][0] - 0.15 * display_width:
+                        x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
+
                 location = []
                 location.append(x_loc)
                 location.append(y_loc)
                 location.append(easy_lives)#Have to change this when adding normal_minions
                 random_enemy.append(location)#Add easy_enemy to list
+                row_enemy.append(location)
+                num_enemy = num_enemy + 1
 
         enemies.append(random_enemy)
     print(enemies)
@@ -485,6 +499,7 @@ def game_loop():
     display_level = True
     wave = 1
     create_wave = True
+    waves_per_level = [15,15,15]
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
 
@@ -537,11 +552,14 @@ def game_loop():
         if display_level:
             level_display(level)
             display_level = False
+            create_wave = True
 
         if create_wave:
             enemies = create_enemies(level,wave)
             wave += 1
-            if wave == 11:
+            if wave == waves_per_level[level-1]:
+                display_level = True
+                level = level + 1
                 wave = 1
             create_wave = False
 
@@ -582,17 +600,19 @@ def game_loop():
 
         if enemy_fire % easy_rate_fire == 0:#Firing for easy enemies
             for loc in enemies[0]:
-                loc_fire = []
-                loc_fire.append(loc[0])
-                loc_fire.append(loc[1])
-                enemy_list_fire.append(loc_fire)
+                if loc[1] > 0:
+                    loc_fire = []
+                    loc_fire.append(loc[0])
+                    loc_fire.append(loc[1])
+                    enemy_list_fire.append(loc_fire)
 
         if enemy_fire % normal_rate_fire == 0:#Firing for normal enemies
             for loc in enemies[1]:
-                loc_fire = []
-                loc_fire.append(loc[0])
-                loc_fire.append(loc[1])
-                enemy_list_fire.append(loc_fire)
+                if loc[1] > 0:
+                    loc_fire = []
+                    loc_fire.append(loc[0])
+                    loc_fire.append(loc[1])
+                    enemy_list_fire.append(loc_fire)
 
         for loc in enemy_list_fire:
             loc[1] = loc[1] + easy_vel_shot
