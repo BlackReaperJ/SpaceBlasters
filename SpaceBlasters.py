@@ -18,12 +18,16 @@ yellow = (200,200,0)
 light_yellow = (255,255,0)
 green = (34,177,76)
 light_green = (0,255,0)
+silver = (80,80,80)
 
 display_width = 700
 display_height = 700
 
 gameDisplay = pygame.display.set_mode((display_width,display_height))#Create a frame 800 by 600
 pygame.display.set_caption("Space Blasters")
+
+button_width = 150
+button_height = 75
 
 clock = pygame.time.Clock()
 FPS = 30
@@ -92,10 +96,13 @@ def button(text, x, y, width, height, inactive_color, active_color, action= None
                 game_loop()
             elif action == "main":
                 game_intro()
+            elif action == "ready":
+                return False
     else:
         pygame.draw.rect(gameDisplay,inactive_color,(x,y,width,height))
 
     text_to_button(text,black,x,y,width,height)
+    return(True)
 
 #Creates a game_controls title page for the game
 def game_controls():
@@ -146,9 +153,6 @@ def game_intro():
         game_stars()
         message_to_screen("Space Blasters",blue,y_displace =-275,size = "large")
 
-        button_width = 150
-        button_height = 75
-
         #Make Buttons, pygame does not have buttons
         button("Play", display_width/2 - 0.5* button_width, 225, button_width, button_height,green, light_green, action = "play")
         button("Controls", display_width/2 - 0.5* button_width, 335, button_width, button_height, yellow, light_yellow, action = "controls")
@@ -191,9 +195,6 @@ def gameover(score):
         message_to_screen("Your total score is: " + str(score),blue,0,"medium")
         message_to_screen("Enter your name:"+ str(name) + type, blue, 60, "medium")
 
-        button_width = 150
-        button_height = 75
-
         #Make Buttons, pygame does not have buttons
         button("Play Again", 12, 600, button_width, button_height,green, light_green, action = "play")
         button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
@@ -207,7 +208,7 @@ def gameover(score):
 def space_ship(x,y):
     #Draws the body
     #1ST cor: head  3rd line: tail
-    player = pygame.draw.polygon(gameDisplay,light_black,((x+7,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+3,y-20),
+    player = pygame.draw.polygon(gameDisplay,silver,((x+7,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+3,y-20),
                                            (x-3,y-20),(x-23,y-2),(x-23,y+5),(x-10,y+5),(x-5,y),(x-3,y+5),(x+3,y+6),
                                            (x+7,y+13),(x+10,y+6),(x+15,y+5),(x+18,y),(x+23,y+5),(x+35,y+5),
                                            (x+35,y-3),(x+15,y-20),(x+10,y-20),(x+10,y-30),(x+18,y-28),(x+18,y-30),
@@ -229,7 +230,10 @@ def player_collision(player,enemies, player_hp):
     return enemies, player_hp
 
 #Creates the easy enemies for the game
-def easy_enemies(x,y, lives):
+def easy_enemies(x,y, lives = 2):
+    x = int(x)
+    y = int(y)
+
     pygame.draw.circle(gameDisplay,violet,(x,y),enemy_easy_height)
     pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_easy_height/1.5))
     pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height/1.5),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Left square
@@ -241,6 +245,30 @@ def easy_enemies(x,y, lives):
         pygame.draw.circle(gameDisplay,blue,(x,y),int(enemy_easy_height/2.5))
     else:
         pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_easy_height/2.5))
+
+def normal_enemies(x,y,lives = 1):
+    x = int(x)
+    y = int(y)
+    part_x = int(enemy_norm_width /2)#26 -> 13
+    part_y = int(enemy_norm_height /2)#32 -> 16
+
+    #Main Body
+    pygame.draw.polygon(gameDisplay,silver,((x-2,y-part_y),(x+2,y-part_y),(x+int(part_x*0.384),y-int(part_y/2)),(x+int(part_x*0.6),y-part_y),
+                        (x+ part_x,y - int(part_y/4 * 3)),(x+int(part_x*0.75),y + int(part_y * 0.3125)),(x+int(part_x*0.65),y + int(part_y * 0.3125)),(x+int(part_x*0.65),y - int(part_y * 0.525)),
+                        (x+int(part_x*0.307),y + 2),(x+int(part_x*0.23),y + int(part_y * 0.8125)),(x+2,y + part_y),(x-2,y + part_y),#Tip
+                        (x-int(part_x*0.23),y + int(part_y * 0.8125)),(x-int(part_x*0.307),y + 2),(x-int(part_x*0.65),y - int(part_y * 0.525)),(x-int(part_x*0.65),y + int(part_y * 0.3125)),(x-int(part_x*0.75),y + int(part_y * 0.3125)),
+                        (x- part_x,y - int(part_y/4 * 3)),(x-int(part_x*0.6),y-part_y),(x-int(part_x*0.384),y-int(part_y/2))))
+
+    #Right Flame
+    pygame.draw.polygon(gameDisplay,blue,((x+int(part_x*0.615),y-int(part_y*0.38)),(x+int(part_x*0.615),y+int(part_y*0.0625)),(x+int(part_x*0.538),y+int(part_y*0.25)),
+                        (x+int(part_x*0.3846),y+int(part_y*0.4375)),(x+int(part_x*0.3086),y+int(part_y*0.0625))))
+
+    #Left Flane
+    pygame.draw.polygon(gameDisplay,blue,((x-int(part_x*0.615),y-int(part_y*0.38)),(x-int(part_x*0.615),y+int(part_y*0.0625)),(x-int(part_x*0.538),y+int(part_y*0.25)),
+                        (x-int(part_x*0.3846),y+int(part_y*0.4375)),(x-int(part_x*0.3086),y+int(part_y*0.0625))))
+
+    #pod
+    pygame.draw.circle(gameDisplay,light_blue,(x,y+int(part_y*0.7575)),int(part_x/7))
 
 #Draws the players laser shots
 def fire(list):
@@ -258,9 +286,10 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                 break
 
     for fire in list_fire:
+        laser = pygame.draw.rect(gameDisplay,blue,(fire[0] + laser_width,fire[1]-50-laser_height,laser_width,laser_height))
         for loc in enemies[0]:#Easy Enemies
-            laser = pygame.draw.rect(gameDisplay,blue,(fire[0] + laser_width,fire[1]-50-laser_height,laser_width,laser_height))
-            if laser.colliderect(int(loc[0]-enemy_easy_height),int(loc[1]-enemy_easy_height),enemy_easy_height*2,enemy_easy_height*2):
+            enemy = pygame.draw.circle(gameDisplay,violet,(loc[0],loc[1]),enemy_easy_height)
+            if enemy.colliderect(laser):
                 list_fire.remove(fire)
                 loc[2] = loc[2] - 1
                 if loc[2] <= 0:
@@ -294,13 +323,43 @@ def display_score(score):
     text = small_font.render("Score: " + str(score), True, white)
     gameDisplay.blit(text, [0,0])
 
+def level_display(level):
+    display_level = True
+    while display_level:
+
+        for event in pygame.event.get():#print(event)
+                if event.type == pygame.QUIT:#Checks if u click exit button
+                    pygame.quit()
+                    quit()
+
+        gameDisplay.fill(black)
+        game_stars()
+
+        if level == 1:
+            message_to_screen("Level 1",blue,-250,"large")
+            text = med_font.render("New Enemy: ->", True, red)
+            gameDisplay.blit(text, [120,190])
+            easy_enemies(475, 225)
+            normal_enemies(600, 200)
+            message_to_screen("Enemy Statistics",blue,0,"medium")
+            text = med_font.render("Speed: Very Slow", True, red)
+            gameDisplay.blit(text, [150,390])
+            text = med_font.render("Rate of Fire: Normal", True, red)
+            gameDisplay.blit(text, [150,460])
+            text = med_font.render("Lives: 2", True, red)
+            gameDisplay.blit(text, [150,530])
+
+        display_level = button("Ready",300,600,button_width,button_height,blue,light_blue,"ready")
+        pygame.display.update()
+        clock.tick(30)
+
+
 #Creates the enemies per waves per level
 def create_enemies(level, wave):
     easy_enemies = []
     normal_enemies = []
     enemy_waves = []
     enemies = []
-    num_enemies = 1
     waves = 0
 
     easy_num = []
@@ -327,19 +386,8 @@ def create_enemies(level, wave):
                 random_enemy.append(location)#Add easy_enemy to list
 
         enemies.append(random_enemy)
-
     print(enemies)
-    '''
-    for x in range(5):
-        location = []
-        location.append(x)
-        location.append(x)
-        normal_enemies.append(location)
-    enemies.append(normal_enemies)
 
-    for x in enemies[1]:
-        print(x[0],x[1])
-    '''
     return enemies
 
 def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,player_hp):
@@ -381,6 +429,7 @@ def game_loop():
     laser_height = 20
 
     level = 1
+    display_level = True
     wave = 1
     create_wave = True
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
@@ -390,9 +439,14 @@ def game_loop():
     enemy_list_fire = []
 
     global enemy_easy_height
-    easy_enemy_fire = 50
+    easy_rate_fire = 50
     enemy_easy_height = 32
     easy_vel_shot = 5
+
+    global enemy_norm_height
+    global enemy_norm_width
+    enemy_norm_height = 64
+    enemy_norm_width = 52
 
     while not game_exit:
         gameDisplay.fill(black)
@@ -423,13 +477,16 @@ def game_loop():
                     loc_fire.append(space_ship_y)
                     list_fire.append(loc_fire)
 
+        if display_level:
+            level_display(level)
+            display_level = False
+
         if create_wave:
             enemies = create_enemies(level,wave)
             wave += 1
             if wave == 11:
                 wave = 1
             create_wave = False
-
 
         #Moves Spaceship
         space_ship_x += move_x
@@ -458,14 +515,14 @@ def game_loop():
         display_score(score)
         health_bar(player_hp)
 
+        fire(list_fire)
+        score = player_fire_collision(list_fire,enemies,score,enemy_list_fire)
+
         # enemies: [0] = easy_enemies, [1] = normal_enemies
         # [][0] = xPos, [][1] = yPos, [][2] = life
         player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,player_hp)
 
-        fire(list_fire)
-        score = player_fire_collision(list_fire,enemies,score,enemy_list_fire)
-
-        if enemy_fire % easy_enemy_fire == 0:#Firing for easy enemies
+        if enemy_fire % easy_rate_fire == 0:#Firing for easy enemies
             for loc in enemies[0]:
                 loc_fire = []
                 loc_fire.append(loc[0])
