@@ -5,13 +5,17 @@ import random
 pygame.init()#Initialize the modules in pygame
 
 white = (255,255,255)#Have to create ur colours in python
+light_black = (25,25,25)
 black = (0,0,0)
 light_black = (30,30,30)
 grey = (50,50,50)
 red = (200,0,0)#red,green,blue
+dark_red = (174,0,0)
 light_red = (255,0,0)
 blue = (0,0,255)#red,green,blue
 light_blue = (0,162,232)
+lighter_dark_blue = (0,149,213)
+light_dark_blue = (0,119,170)
 violet = (53,0,106)
 dark_violet = (46,0,91)
 yellow = (200,200,0)
@@ -19,6 +23,8 @@ light_yellow = (255,255,0)
 green = (34,177,76)
 light_green = (0,255,0)
 silver = (80,80,80)
+
+pi = 3.141592653 #For arcs
 
 display_width = 700
 display_height = 700
@@ -104,6 +110,7 @@ def button(text, x, y, width, height, inactive_color, active_color, action= None
     text_to_button(text,black,x,y,width,height)
     return(True)
 
+#Pause the game
 def pause():
     paused = True
 
@@ -258,22 +265,54 @@ def player_collision(player,enemies, player_hp):
     return enemies, player_hp
 
 #Creates the easy enemies for the game
-def easy_enemies(x,y, lives = 2):
+def easy_enemies(x,y,lives = 2):
     x = int(x)
     y = int(y)
+    part = int(enemy_hard_height /2)#32 -> 16
 
-    pygame.draw.circle(gameDisplay,violet,(x,y),enemy_easy_height)
-    pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_easy_height/1.5))
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height/1.5),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Left square
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x+enemy_easy_height/3.1),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Eight square
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y+enemy_easy_height/3.1),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Bottom square
-    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y-enemy_easy_height/1.5),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Top Sqaure
+    #Main Body
+    pygame.draw.polygon(gameDisplay,light_dark_blue,((x-int(part *0.25),y+part),(x-int(part *0.5),y+part),(x-int(part *0.5),y-int(part *0.5)),(x+int(part *0.5),y-int(part *0.5)),(x+int(part *0.5),y+part),
+                                                (x+int(part *0.25),y+part),(x+int(part *0.25),y-int(part*0.25)),(x-int(part *0.25),y-int(part*0.25))))
 
-    if lives == 1:
-        pygame.draw.circle(gameDisplay,blue,(x,y),int(enemy_easy_height/2.5))
+    #Top Left Tip
+    pygame.draw.rect(gameDisplay,light_dark_blue,(x-int(part*0.3125),y - int(part*0.9375), int(part*0.25),int(part * 0.4375)))
+
+    #Top Right Tip
+    pygame.draw.rect(gameDisplay,light_dark_blue,(x+int(part*0.125),y - int(part*0.9375), int(part*0.25),int(part * 0.4375)))
+
+    #Center top gray
+    pygame.draw.rect(gameDisplay,light_black,(x-int(part*0.0625),y - int(part*0.25), int(part*0.1875),int(part * 0.0625)))
+
+    #Center Left Gray
+    pygame.draw.rect(gameDisplay,light_black,(x-int(part*0.1875),y - int(part*0.125), int(part*0.0625),int(part * 0.1875)))
+
+    #Center Right Gray
+    pygame.draw.rect(gameDisplay,light_black,(x+int(part*0.1875),y - int(part*0.125), int(part*0.0625),int(part * 0.1875)))
+
+    #Center Head
+    pygame.draw.rect(gameDisplay,light_black,(x-int(part*0.0625),y + int(part*0.125), int(part*0.1875),int(part * 0.4375)))
+
+
+    if lives == 2:
+        #Center
+        pygame.draw.rect(gameDisplay,dark_red ,(x-int(part*0.125),y - int(part*0.1875), int(part*0.3125),int(part * 0.3125)))
+
+        #Left Wing
+        pygame.draw.polygon(gameDisplay,red,((x-int(part *0.555),y-int(part *0.5)),(x-int(part *0.6875),y-int(part *0.625)),(x-int(part *0.825),y-int(part *0.625)),(x- part,y-int(part *0.3125)),
+                        (x- part,y+int(part *0.3125)),(x-int(part *0.75),y+int(part *0.875)),(x-int(part *0.6875),y+int(part *0.875)),(x-int(part *0.555),y+int(part *0.6875))))
+        #Right Wing
+        pygame.draw.polygon(gameDisplay,red,((x+int(part *0.56),y-int(part *0.5)),(x+int(part *0.6875),y-int(part *0.625)),(x+int(part *0.825),y-int(part *0.625)),(x+ part,y-int(part *0.3125)),
+                        (x+ part,y+int(part *0.3125)),(x+int(part *0.75),y+int(part *0.875)),(x+int(part *0.6875),y+int(part *0.875)),(x+int(part *0.56),y+int(part *0.6875))))
+
     else:
-        pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_easy_height/2.5))
+        pygame.draw.rect(gameDisplay,blue ,(x-int(part*0.125),y - int(part*0.1875), int(part*0.3125),int(part * 0.3125)))
+        pygame.draw.polygon(gameDisplay,blue,((x-int(part *0.555),y-int(part *0.5)),(x-int(part *0.6875),y-int(part *0.625)),(x-int(part *0.825),y-int(part *0.625)),(x- part,y-int(part *0.3125)),
+                        (x- part,y+int(part *0.3125)),(x-int(part *0.75),y+int(part *0.875)),(x-int(part *0.6875),y+int(part *0.875)),(x-int(part *0.555),y+int(part *0.6875))))
+        pygame.draw.polygon(gameDisplay,blue,((x+int(part *0.56),y-int(part *0.5)),(x+int(part *0.6875),y-int(part *0.625)),(x+int(part *0.825),y-int(part *0.625)),(x+ part,y-int(part *0.3125)),
+                        (x+ part,y+int(part *0.3125)),(x+int(part *0.75),y+int(part *0.875)),(x+int(part *0.6875),y+int(part *0.875)),(x+int(part *0.56),y+int(part *0.6875))))
 
+
+#Creates the normal enemies for the game
 def normal_enemies(x,y,lives = 1):
     x = int(x)
     y = int(y)
@@ -298,10 +337,22 @@ def normal_enemies(x,y,lives = 1):
     #pod
     pygame.draw.circle(gameDisplay,light_blue,(x,y+int(part_y*0.7575)),int(part_x/7))
 
-def hard_enemies(x,y,lives = 2):
+#Creates the hard enemies for the game
+def hard_enemies(x,y, lives = 2):
     x = int(x)
     y = int(y)
 
+    pygame.draw.circle(gameDisplay,violet,(x,y),enemy_easy_height)
+    pygame.draw.circle(gameDisplay,black,(x,y),int(enemy_easy_height/1.5))
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height/1.5),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Left square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x+enemy_easy_height/3.1),int(y-enemy_easy_height*0.15),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Eight square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y+enemy_easy_height/3.1),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Bottom square
+    pygame.draw.rect(gameDisplay,dark_violet,(int(x-enemy_easy_height*0.15),int(y-enemy_easy_height/1.5),int(enemy_easy_height/2.8),int(enemy_easy_height/2.8)))#Top Sqaure
+
+    if lives == 1:
+        pygame.draw.circle(gameDisplay,blue,(x,y),int(enemy_easy_height/2.5))
+    else:
+        pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_easy_height/2.5))
 
 #Draws the players laser shots
 def fire(list):
@@ -310,7 +361,7 @@ def fire(list):
 
 #Players Laser Collision for enemy laser and enemies
 def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
-    for fire in list_fire:
+    for fire in list_fire:#Player laser and Enemy Laser collision
         laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
         for enemy_fire in enemy_list_fire:
             if laser.colliderect(enemy_fire[0],enemy_fire[1],laser_width,laser_height):
@@ -318,10 +369,10 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                 enemy_list_fire.remove(enemy_fire)
                 break
 
-    for fire in list_fire:
+    for fire in list_fire:#Player laser and Enemy collision
         laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
         for loc in enemies[0]:#Easy Enemies
-            enemy = pygame.draw.circle(gameDisplay,violet,(loc[0],loc[1]),enemy_easy_height)
+            enemy = pygame.draw.circle(gameDisplay,black,(loc[0],loc[1]),enemy_easy_height)
             if enemy.colliderect(laser):
                 list_fire.remove(fire)
                 loc[2] = loc[2] - 1
@@ -377,6 +428,7 @@ def display_score(score):
     text = small_font.render("Score: " + str(score), True, white)
     gameDisplay.blit(text, [0,0])
 
+#Tje description of the level before the level begins
 def level_display(level):
     display_level = True
     speed = ""
@@ -436,23 +488,20 @@ def level_display(level):
 
 #Creates the enemies per waves per level
 def create_enemies(level, wave):
-    easy_enemies = []
-    normal_enemies = []
     enemy_waves = []
     enemies = []
-    waves = 0
-    num_enemy = 0
-    next_enemy = 0
+    num_enemy = 0#Total Number of enemies
+    next_enemy = 0#Type of enemies 0-Easy, 1- Normal, 2-Hard
 
     easy_num = []
     normal_num = []
 
-    lives = [2,1]
+    lives = [2,1,2]
 
     if level == 1:
-        easy_num = [1,2,2,3,3,3,4,4,4,5,5,5,6,6,7]
+        easy_num = [1,2,2,3,3,3,4,4,4,5,5,5,6,6,7]#Number of enemies per wave
     elif level == 2:
-        easy_num =   [0,1,0,2,3,2,0,3,4,1,2,5,3,4,6,4]
+        easy_num =   [0,1,0,2,3,2,0,3,4,1,2,5,3,4,6,5]
         normal_num = [1,1,2,1,1,2,3,2,2,3,3,2,3,3,2,3]
 
     enemy_waves.append(easy_num)
@@ -466,7 +515,6 @@ def create_enemies(level, wave):
             for y in range(enemy_waves[x][wave-1]):#Creates Easy Enemies per wave
                 x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
                 y_loc = int(-20 - 100 * int(num_enemy /3))
-
 
                 if num_enemy % 3 == 1:
                     while row_enemy[-1][0] + 0.15 * display_width > x_loc > row_enemy[-1][0] - 0.15 * display_width:
@@ -539,7 +587,7 @@ def game_loop():
     laser_width = 7#originally 5
     laser_height = 20
 
-    level = 2
+    level = 1
     display_level = True
     wave = 1
     create_wave = True
@@ -561,6 +609,12 @@ def game_loop():
     enemy_norm_height = 64
     enemy_norm_width = 52
     normal_vel = 3#This is actually 3.5
+
+    global enemy_hard_height
+    enemy_hard_height = 64
+    hard_rate_fire = 75
+    hard_vel = 0.5
+
 
     while not game_exit:
         for event in pygame.event.get():#print(event)
@@ -597,6 +651,9 @@ def game_loop():
         if display_level:
             wave = 1
             player_hp = 10
+            list_fire = []
+            move_x = 0
+            move_y = 0
             level_display(level)
             display_level = False
             create_wave = True
