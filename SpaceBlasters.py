@@ -262,6 +262,11 @@ def player_collision(player,enemies, player_hp):
             player_hp = player_hp - 1
             enemies[1].remove(loc)
 
+    for loc in enemies[2]:#Collision for easy_enemies
+        if player.colliderect(int(loc[0]-enemy_easy_height/1.5),int(loc[1]-enemy_easy_height/1.5),int(enemy_easy_height*1.5),int(enemy_easy_height*1.5)):
+            player_hp = player_hp - 1
+            enemies[2].remove(loc)
+
     return enemies, player_hp
 
 #Creates the easy enemies for the game
@@ -423,10 +428,26 @@ def enemy_fire_collision(player,enemy_list_fire,player_hp):
             enemy_list_fire.remove(fire)
     return player_hp
 
-def ai_move(norm_enemy,list_fire):
+def ai_move(hard_enemy,list_fire):
     for fire in list_fire:
-        for enemy in norm_enemy:
-            pass
+        for enemy in hard_enemy:
+            if enemy[0] + enemy_hard_height > fire[0] > enemy[0] - enemy_hard_height:
+                if enemy[0] < 0.05 * display_width:
+                    enemy[0] = enemy[0] + 5
+                elif enemy[0] > 0.92 * display_width:
+                    enemy[0] = enemy[0] - 5
+                elif enemy[0] <= 0.5 * display_width:
+                    enemy[0] = enemy[0] + 5
+                elif enemy[0] >= 0.5 * display_width:
+                    enemy[0] = enemy[0] - 5
+                '''
+                else:
+                    movement = random.randrange(0,2)
+                    if movement == 0:
+                        enemy[0] = enemy[0] + 5
+                    else:
+                        enemy[0] = enemy[0] - 5
+                '''
 
 #Draws the hp bar
 def health_bar(hp):
@@ -722,7 +743,7 @@ def game_loop():
         # enemies: [0] = easy_enemies, [1] = normal_enemies
         # [][0] = xPos, [][1] = yPos, [][2] = life
         player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,enemies[2],hard_vel,player_hp,delay)
-        ai_move(enemies[1],list_fire)
+        ai_move(enemies[2],list_fire)
 
         if enemy_fire % easy_rate_fire == 0:#Firing for easy enemies
             for loc in enemies[0]:
