@@ -369,7 +369,7 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                 enemy_list_fire.remove(enemy_fire)
                 break
 
-    for fire in list_fire:#Player laser and Enemy collision
+    for fire in list_fire:#Player laser and Easy Enemy collision
         laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
         for loc in enemies[0]:#Easy Enemies
             enemy = pygame.draw.circle(gameDisplay,black,(loc[0],loc[1]),enemy_easy_height)
@@ -395,6 +395,16 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                 if loc[2] <= 0:
                     score =  score + 100
                     enemies[1].remove(loc)
+                break
+
+        for loc in enemies[2]:#Hard Enemies
+            enemy = pygame.draw.circle(gameDisplay,black,(int(loc[0]),int(loc[1])),int(enemy_hard_height/2))
+            if enemy.colliderect(laser):
+                list_fire.remove(fire)
+                loc[2] = loc[2] - 1
+                if loc[2] <= 0:
+                    score =  score + 100
+                    enemies[2].remove(loc)
                 break
 
     return score
@@ -453,8 +463,6 @@ def level_display(level):
 
         if level == 1:
             easy_enemies(505, 175)
-            normal_enemies(575, 175)
-            hard_enemies(645, 175)
             speed = "Slow"
             rate = "Normal"
             lives = 2
@@ -465,10 +473,10 @@ def level_display(level):
             rate = "None"
             lives = 1
             unique = "Can't Shoot"
-        elif level == 2:
+        elif level == 3:
             hard_enemies(505, 175)
             speed = "Very Slow"
-            rate = "Normal"
+            rate = "Slow"
             lives = 2
             unique = "AI"
 
@@ -493,8 +501,9 @@ def create_enemies(level, wave):
     num_enemy = 0#Total Number of enemies
     next_enemy = 0#Type of enemies 0-Easy, 1- Normal, 2-Hard
 
-    easy_num = []
-    normal_num = []
+    easy_num = []#Level 1 enemies
+    normal_num = []#Level 2 enemies
+    hard_num = []#Level 3 enemies
 
     lives = [2,1,2]
 
@@ -503,9 +512,12 @@ def create_enemies(level, wave):
     elif level == 2:
         easy_num =   [0,1,0,2,3,2,0,3,4,1,2,5,3,4,6,5]
         normal_num = [1,1,2,1,1,2,3,2,2,3,3,2,3,3,2,3]
+    elif level == 3:
+        hard_num = [1,1,1,1,1,2,2,2,2,3,3,2,3,3,2,3]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
+    enemy_waves.append(hard_num)
 
     row_enemy = []
 
@@ -538,10 +550,11 @@ def create_enemies(level, wave):
 
     return enemies
 
-def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,player_hp,delay):
+def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,hard_enemy,hard_vel,player_hp,delay):
     wave_complete = False
     if delay == 1:
             normal_vel = normal_vel + 1
+            hard_vel = hard_vel + 1
 
     if easy_enemy != []:
         for loc in easy_enemy:
@@ -561,9 +574,18 @@ def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,player_hp,delay):
                 continue
             normal_enemies(loc[0],loc[1],loc[2])
 
+    if hard_enemy != []:
+        for loc in hard_enemy:
+            loc[1] = loc[1] + hard_vel
+            if loc[1] > display_height:
+                hard_enemy.remove(loc)
+                player_hp = player_hp -1#Losses life if spaceship gets past the end
+                continue
+            hard_enemies(loc[0],loc[1],loc[2])
+
     #if normal_enemies == []:
     #    print("nothing")
-    if easy_enemy == [] and normal_enemy == []:
+    if easy_enemy == [] and normal_enemy == [] and hard_enemy == []:
         wave_complete = True
     return player_hp, wave_complete
 
@@ -587,7 +609,7 @@ def game_loop():
     laser_width = 7#originally 5
     laser_height = 20
 
-    level = 1
+    level = 3
     display_level = True
     wave = 1
     create_wave = True
@@ -699,7 +721,7 @@ def game_loop():
 
         # enemies: [0] = easy_enemies, [1] = normal_enemies
         # [][0] = xPos, [][1] = yPos, [][2] = life
-        player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,player_hp,delay)
+        player_hp,create_wave = level_create(enemies[0],easy_vel,enemies[1],normal_vel,enemies[2],hard_vel,player_hp,delay)
         ai_move(enemies[1],list_fire)
 
         if enemy_fire % easy_rate_fire == 0:#Firing for easy enemies
@@ -709,15 +731,15 @@ def game_loop():
                     loc_fire.append(loc[0])
                     loc_fire.append(loc[1])
                     enemy_list_fire.append(loc_fire)
-        '''
-        if enemy_fire % normal_rate_fire == 0:#Firing for normal enemies
-            for loc in enemies[1]:
+
+        if enemy_fire % hard_rate_fire == 0:#Firing for normal enemies
+            for loc in enemies[2]:
                 if loc[1] > 0:
                     loc_fire = []
                     loc_fire.append(loc[0])
                     loc_fire.append(loc[1])
                     enemy_list_fire.append(loc_fire)
-        '''
+
 
         for loc in enemy_list_fire:
             loc[1] = loc[1] + easy_vel_shot
