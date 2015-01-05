@@ -431,15 +431,16 @@ def enemy_fire_collision(player,enemy_list_fire,player_hp):
 def ai_move(hard_enemy,list_fire):
     for fire in list_fire:
         for enemy in hard_enemy:
-            if enemy[0] + enemy_hard_height > fire[0] > enemy[0] - enemy_hard_height:
+            if enemy[0] + enemy_hard_height > fire[0] > enemy[0] - enemy_hard_height and enemy[1] + 200 > fire[1]:
                 if enemy[0] < 0.05 * display_width:
                     enemy[0] = enemy[0] + 5
                 elif enemy[0] > 0.92 * display_width:
                     enemy[0] = enemy[0] - 5
-                elif enemy[0] <= 0.5 * display_width:
-                    enemy[0] = enemy[0] + 5
-                elif enemy[0] >= 0.5 * display_width:
+                elif fire[0] > enemy[0]:
                     enemy[0] = enemy[0] - 5
+                elif fire[0] < enemy[0]:
+                    enemy[0] = enemy[0] + 5
+                break
                 '''
                 else:
                     movement = random.randrange(0,2)
