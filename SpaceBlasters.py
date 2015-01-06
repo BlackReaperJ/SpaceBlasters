@@ -251,23 +251,26 @@ def space_ship(x,y):
     return player
 
 #If the players ship collides with the enemies ship
-def player_collision(player,enemies, player_hp):
+def player_collision(player,enemies, player_hp,score):
     for loc in enemies[0]:#Collision for easy_enemies
         if player.colliderect(int(loc[0]-enemy_easy_height/1.5),int(loc[1]-enemy_easy_height/1.5),int(enemy_easy_height*1.5),int(enemy_easy_height*1.5)):
             player_hp = player_hp - 1
+            score = score - 100
             enemies[0].remove(loc)
 
     for loc in enemies[1]:
         if player.colliderect(int(loc[0]-enemy_norm_width/2.5),int(loc[1]-enemy_norm_height/2.5),int(enemy_norm_width*0.8),int(enemy_norm_height*0.6)):
             player_hp = player_hp - 1
+            score = score - 100
             enemies[1].remove(loc)
 
     for loc in enemies[2]:#Collision for easy_enemies
         if player.colliderect(int(loc[0]-enemy_easy_height/1.5),int(loc[1]-enemy_easy_height/1.5),int(enemy_easy_height*1.5),int(enemy_easy_height*1.5)):
             player_hp = player_hp - 1
+            score = score - 100
             enemies[2].remove(loc)
 
-    return enemies, player_hp
+    return enemies, player_hp,score
 
 #Creates the easy enemies for the game
 def easy_enemies(x,y,lives = 2):
@@ -420,13 +423,14 @@ def enemy_fires(enemy):
         pygame.draw.rect(gameDisplay,red,(loc[0],loc[1],laser_width,laser_height))
 
 #Enemy laser collision for the player and reduces hp of player if true
-def enemy_fire_collision(player,enemy_list_fire,player_hp):
+def enemy_fire_collision(player,enemy_list_fire,player_hp,score):
     for fire in enemy_list_fire:
         laser = pygame.draw.rect(gameDisplay,red,(fire[0],fire[1],laser_width,laser_height))
         if player.colliderect(laser):
             player_hp = player_hp - 1
+            score = score - 100
             enemy_list_fire.remove(fire)
-    return player_hp
+    return player_hp,score
 
 def ai_move(hard_enemy,list_fire):
     for fire in list_fire:
@@ -440,7 +444,7 @@ def ai_move(hard_enemy,list_fire):
                     enemy[0] = enemy[0] - 5
                 elif fire[0] < enemy[0]:
                     enemy[0] = enemy[0] + 5
-                break
+
                 '''
                 else:
                     movement = random.randrange(0,2)
@@ -535,7 +539,9 @@ def create_enemies(level, wave):
         easy_num =   [0,1,0,2,3,2,0,3,4,1,2,5,3,4,6,5]
         normal_num = [1,1,2,1,1,2,3,2,2,3,3,2,3,3,2,3]
     elif level == 3:
-        hard_num = [1,1,1,1,1,2,2,2,2,3,3,2,3,3,2,3]
+        easy_num =   [0,1,0,0,1,1,0,0,1,2,1,1,2,2,1,2]
+        normal_num = [0,0,1,0,1,0,1,0,2,1,2,1,2,1,2,2]
+        hard_num =   [1,1,1,2,1,2,2,3,1,2,2,3,2,3,3,3]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
@@ -635,7 +641,7 @@ def game_loop():
     display_level = True
     wave = 1
     create_wave = True
-    waves_per_level = [15,16,15]
+    waves_per_level = [15,16,16]
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
     enemy_fire = 0
@@ -656,7 +662,7 @@ def game_loop():
 
     global enemy_hard_height
     enemy_hard_height = 64
-    hard_rate_fire = 75
+    hard_rate_fire = 60
     hard_vel = 0.5
 
 
@@ -771,11 +777,14 @@ def game_loop():
         enemy_fires(enemy_list_fire)
         player = space_ship(space_ship_x,space_ship_y)
 
-        enemies, player_hp = player_collision(player,enemies,player_hp)
+        enemies, player_hp,score = player_collision(player,enemies,player_hp,score)
         player_hp = enemy_fire_collision(player,enemy_list_fire,player_hp)
 
         if player_hp <= 0:
             gameover(score)
+
+        if score < 0:
+            score = 0
 
         pygame.display.update()
         clock.tick(FPS)
