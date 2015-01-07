@@ -422,15 +422,14 @@ def enemy_fires(enemy):
     for loc in enemy:
         pygame.draw.rect(gameDisplay,red,(loc[0],loc[1],laser_width,laser_height))
 
-#Enemy laser collision for the player and reduces hp of player if true
-def enemy_fire_collision(player,enemy_list_fire,player_hp,score):
+#Enemy laser collision for the player
+def enemy_fire_collision(player,enemy_list_fire,player_hp):
     for fire in enemy_list_fire:
         laser = pygame.draw.rect(gameDisplay,red,(fire[0],fire[1],laser_width,laser_height))
         if player.colliderect(laser):
             player_hp = player_hp - 1
-            score = score - 100
             enemy_list_fire.remove(fire)
-    return player_hp,score
+    return player_hp
 
 def ai_move(hard_enemy,list_fire):
     for fire in list_fire:
@@ -444,15 +443,6 @@ def ai_move(hard_enemy,list_fire):
                     enemy[0] = enemy[0] - 5
                 elif fire[0] < enemy[0]:
                     enemy[0] = enemy[0] + 5
-
-                '''
-                else:
-                    movement = random.randrange(0,2)
-                    if movement == 0:
-                        enemy[0] = enemy[0] + 5
-                    else:
-                        enemy[0] = enemy[0] - 5
-                '''
 
 #Draws the hp bar
 def health_bar(hp):
@@ -483,9 +473,6 @@ def level_display(level):
         game_stars()
 
         message_to_screen("Level " + str(level),blue,-290,"large")
-        text = med_font.render("New Enemy: ->", True, red)
-        gameDisplay.blit(text, [150,140])
-        message_to_screen("Enemy Statistics",blue,-100,"medium")
 
         if level == 1:
             easy_enemies(505, 175)
@@ -502,23 +489,65 @@ def level_display(level):
         elif level == 3:
             hard_enemies(505, 175)
             speed = "Very Slow"
-            rate = "Slow"
+            rate = "Normal"
             lives = 2
             unique = "AI"
+        elif level == 4:
+            create_stage_hazard([[600,175]])
 
-        text = med_font.render("Speed: " + speed, True, red)
-        gameDisplay.blit(text, [100,290])
-        text = med_font.render("Rate of Fire: "+rate, True, red)
-        gameDisplay.blit(text, [100,360])
-        text = med_font.render("Lives: " +str(lives), True, red)
-        gameDisplay.blit(text, [100,430])
-        text = med_font.render("Unique: " +str(unique), True, red)
-        gameDisplay.blit(text, [100,500])
+        if level != 4:
+            text = med_font.render("New Enemy: ->", True, red)
+            gameDisplay.blit(text, [150,140])
+            message_to_screen("Enemy Statistics",blue,-100,"medium")
+            text = med_font.render("Speed: " + speed, True, red)
+            gameDisplay.blit(text, [100,290])
+            text = med_font.render("Rate of Fire: "+rate, True, red)
+            gameDisplay.blit(text, [100,360])
+            text = med_font.render("Lives: " +str(lives), True, red)
+            gameDisplay.blit(text, [100,430])
+            text = med_font.render("Unique: " +str(unique), True, red)
+            gameDisplay.blit(text, [100,500])
+        else:
+            text = med_font.render("New Stage Hazard: ->", True, red)
+            gameDisplay.blit(text, [100,140])
+            message_to_screen("Black Hole Effects",blue,-100,"medium")
+            text = med_font.render("Lasers are destroyed" + speed, True, red)
+            gameDisplay.blit(text, [100,290])
+            text = med_font.render("by Black Holes " + speed, True, red)
+            gameDisplay.blit(text, [100,360])
 
         display_level = button("Ready",300,600,button_width,button_height,blue,light_blue,"ready")
         pygame.display.update()
         clock.tick(30)
 
+#Destroys any laser that intersect at  black holes
+def black_hole_destroy(black_hole,list_fire):
+    for fire in list_fire:
+        laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
+        for black in black_hole:
+            black_holes = pygame.draw.circle(gameDisplay,dark_red,(black[0],black[1]),black_hole_height)
+            if black_holes.colliderect(laser):
+                list_fire.remove(fire)
+                break
+
+#Creates stage hazards for the game
+def create_stage_hazard(black_hole):
+    for loc in black_hole:
+        part = black_hole_height#Radius Black Hole
+        x = loc[0]
+        y = loc[1]
+        pygame.draw.circle(gameDisplay,dark_red,(x,y),black_hole_height)
+        pygame.draw.circle(gameDisplay,black,(x,y),int(black_hole_height/2))
+        pygame.draw.circle(gameDisplay,dark_red,(x,y),int(black_hole_height/2) -1)
+        pygame.draw.polygon(gameDisplay,black,((x+int(part*0.6875),y-int(part*0.8125)),(x+int(part*0.5625),y-int(part*0.6875)),(x+int(part*0.0625),y-int(part*0.375)),(x- int(part*0.125),y-int(part*0.0625)),#Top Right Thorn to Top left Corner
+                                                (x- int(part*0.4325),y-int(part*0.1875)),(x- int(part*0.625),y-int(part*0.5)),(x- int(part*0.8125),y-int(part*0.6875)),#Top Left Corner to Top Left Thorn
+                                                (x- int(part*0.6875),y-int(part*0.5625)),(x- int(part*0.375),y-int(part*0.0625)),(x- int(part*0.0625),y+ int(part*0.125)),#Top Left Thorn to Bottom Left Corner
+                                                (x- int(part*0.1875),y+int(part*0.4325)),(x- int(part*0.5),y+int(part*0.625)),(x- int(part*0.6875),y+int(part*0.8125)),#Bottom Left Corner to Bottom Left Thorn
+                                                (x- int(part*0.5625),y+int(part*0.6875)),(x- int(part*0.0625),y+int(part*0.375)),(x+ int(part*0.125),y- int(part*0.0625)),#Bottom Left Thorn to Bottom Right Corner
+                                                (x+ int(part*0.4325),y+int(part*0.1875)),(x+ int(part*0.625),y+int(part*0.5)),(x+ int(part*0.8125),y+int(part*0.6875)),#Bottom Right Corner to Bottom Right Thorn
+                                                (x+ int(part*0.6875),y+int(part*0.5625)),(x+ int(part*0.375),y+int(part*0.0625)),(x+ int(part*0.0625),y- int(part*0.125)),#Bottom Right Thorn to Top Right Corner
+                                                (x+ int(part*0.1875),y-int(part*0.4325)),(x+ int(part*0.5),y-int(part*0.625))))
+        pygame.draw.circle(gameDisplay,red,(x,y),int(black_hole_height*0.0625/2))
 
 #Creates the enemies per waves per level
 def create_enemies(level, wave):
@@ -531,6 +560,9 @@ def create_enemies(level, wave):
     normal_num = []#Level 2 enemies
     hard_num = []#Level 3 enemies
 
+    black_hole = []#Level 4 Stage Hazard
+    num_black_hole = 0
+
     lives = [2,1,2]
 
     if level == 1:
@@ -542,10 +574,18 @@ def create_enemies(level, wave):
         easy_num =   [0,1,0,0,1,1,0,0,1,2,1,1,2,2,1,2]
         normal_num = [0,0,1,0,1,0,1,0,2,1,2,1,2,1,2,2]
         hard_num =   [1,1,1,2,1,2,2,3,1,2,2,3,2,3,3,3]
+    elif level == 4:
+        easy_num =   [1,0,1,1,1,2,1,2,1,2,1,1,2,2,1,2]
+        normal_num = [0,1,1,1,2,1,1,2,2,1,2,1,2,1,2,2]
+        hard_num =   [1,1,0,1,1,1,2,1,1,2,2,3,2,3,3,3]
+        black_hole = [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
     enemy_waves.append(hard_num)
+
+    if black_hole != []:
+        num_black_hole = black_hole[wave]
 
     row_enemy = []
 
@@ -576,7 +616,7 @@ def create_enemies(level, wave):
         enemies.append(random_enemy)
     print(enemies)
 
-    return enemies
+    return enemies,num_black_hole
 
 def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,hard_enemy,hard_vel,player_hp,delay):
     wave_complete = False
@@ -637,11 +677,11 @@ def game_loop():
     laser_width = 7#originally 5
     laser_height = 20
 
-    level = 3
+    level = 4
     display_level = True
     wave = 1
     create_wave = True
-    waves_per_level = [15,16,16]
+    waves_per_level = [15,16,16,16]
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
     enemy_fire = 0
@@ -665,6 +705,10 @@ def game_loop():
     hard_rate_fire = 60
     hard_vel = 0.5
 
+    num_black_hole = 0
+    black_hole = []
+    global black_hole_height
+    black_hole_height = 20
 
     while not game_exit:
         for event in pygame.event.get():#print(event)
@@ -707,13 +751,22 @@ def game_loop():
             level_display(level)
             display_level = False
             create_wave = True
+            num_black_hole = 0
 
         if create_wave:
-            enemies = create_enemies(level,wave)
+            enemies,num_black_hole = create_enemies(level,wave)
             wave += 1
             if wave == waves_per_level[level-1]:
                 display_level = True
                 level = level + 1
+
+            black_hole = []
+            for x in range(num_black_hole):
+                print(num_black_hole, "hi")
+                loc = []
+                loc.append(random.randrange(0.05*display_width,0.92*display_width))
+                loc.append(random.randrange(0.3*display_height,0.8*display_height))
+                black_hole.append(loc)
             create_wave = False
 
         #Moves Spaceship
@@ -743,6 +796,8 @@ def game_loop():
         game_stars()
         display_score(score)
         health_bar(player_hp)
+        black_hole_destroy(black_hole,list_fire)
+        create_stage_hazard(black_hole)
 
         fire(list_fire)
         score = player_fire_collision(list_fire,enemies,score,enemy_list_fire)
