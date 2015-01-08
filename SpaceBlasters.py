@@ -39,7 +39,8 @@ clock = pygame.time.Clock()
 FPS = 30
 
 small_font = pygame.font.SysFont("comicsansms",25)#Type of font, Font size 25
-med_font = pygame.font.SysFont("comicsansms",45)#pygame.font.Font to use custom fonts .ttf
+med_font = pygame.font.SysFont("comicsansms",40)#pygame.font.Font to use custom fonts .ttf
+medbig_font = pygame.font.SysFont("comicsansms",45)
 large_font = pygame.font.SysFont("comicsansms",80)
 
 #Creation of Stars
@@ -379,6 +380,7 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
 
     for fire in list_fire:#Player laser and Easy Enemy collision
         laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
+        i = len(enemies[0])
         for loc in enemies[0]:#Easy Enemies
             enemy = pygame.draw.circle(gameDisplay,black,(loc[0],loc[1]),enemy_easy_height)
             if enemy.colliderect(laser):
@@ -389,6 +391,10 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                     enemies[0].remove(loc)
                 break#need to break if a laser overlaps with 2 enemies at the same location
 
+        if i > len(enemies[0]):
+            continue
+
+        i = len(enemies[1])
         for loc in enemies[1]:#Norm Enemies
             part_x = int(enemy_norm_width /2)
             part_y = int(enemy_norm_height/2)
@@ -405,6 +411,10 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                     enemies[1].remove(loc)
                 break
 
+        if i > len(enemies[1]):
+            continue
+
+        i = len(enemies[2])
         for loc in enemies[2]:#Hard Enemies
             enemy = pygame.draw.circle(gameDisplay,black,(int(loc[0]),int(loc[1])),int(enemy_hard_height/2))
             if enemy.colliderect(laser):
@@ -414,6 +424,9 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                     score =  score + 100
                     enemies[2].remove(loc)
                 break
+
+        if i > len(enemies[2]):
+            continue
 
     return score
 
@@ -479,7 +492,7 @@ def level_display(level):
             speed = "Slow"
             rate = "Normal"
             lives = 2
-            unique = "None"
+            unique = "Speed Doubles When Hit"
         elif level == 2:
             normal_enemies(505, 175)
             speed = "Fast"
@@ -491,24 +504,29 @@ def level_display(level):
             speed = "Very Slow"
             rate = "Normal"
             lives = 2
-            unique = "AI"
+            unique = "AI Movement"
         elif level == 4:
             create_stage_hazard([[600,175]])
+            create_stage_hazard([[203,500]])
+            create_stage_hazard([[303,500]])
+            pygame.draw.rect(gameDisplay,blue,(200,535,laser_width,laser_height))
+            text = med_font.render("->", True, red)
+            gameDisplay.blit(text, [235,470])
 
         if level != 4:
-            text = med_font.render("New Enemy: ->", True, red)
+            text = medbig_font.render("New Enemy: ->", True, red)
             gameDisplay.blit(text, [150,140])
             message_to_screen("Enemy Statistics",blue,-100,"medium")
             text = med_font.render("Speed: " + speed, True, red)
-            gameDisplay.blit(text, [100,290])
+            gameDisplay.blit(text, [50,290])
             text = med_font.render("Rate of Fire: "+rate, True, red)
-            gameDisplay.blit(text, [100,360])
+            gameDisplay.blit(text, [50,360])
             text = med_font.render("Lives: " +str(lives), True, red)
-            gameDisplay.blit(text, [100,430])
+            gameDisplay.blit(text, [50,430])
             text = med_font.render("Unique: " +str(unique), True, red)
-            gameDisplay.blit(text, [100,500])
+            gameDisplay.blit(text, [50,500])
         else:
-            text = med_font.render("New Stage Hazard: ->", True, red)
+            text = medbig_font .render("New Stage Hazard: ->", True, red)
             gameDisplay.blit(text, [100,140])
             message_to_screen("Black Hole Effects",blue,-100,"medium")
             text = med_font.render("Lasers are destroyed" + speed, True, red)
@@ -527,6 +545,12 @@ def black_hole_destroy(black_hole,list_fire):
         for black in black_hole:
             black_holes = pygame.draw.circle(gameDisplay,dark_red,(black[0],black[1]),black_hole_height)
             if black_holes.colliderect(laser):
+                '''
+                if fire[0] <= black[0]:
+                    fire[0] = fire[0] - 5
+                else:
+                    fire[0] = fire[0] + 5
+                '''
                 list_fire.remove(fire)
                 break
 
@@ -578,7 +602,7 @@ def create_enemies(level, wave):
         easy_num =   [1,0,1,1,1,2,1,2,1,2,1,1,2,2,1,2]
         normal_num = [0,1,1,1,2,1,1,2,2,1,2,1,2,1,2,2]
         hard_num =   [1,1,0,1,1,1,2,1,1,2,2,3,2,3,3,3]
-        black_hole = [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]
+        black_hole = [7,7,7,8,8,8,9,9,9,10,10,10,11,11,11,12]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
@@ -626,7 +650,11 @@ def level_create(easy_enemy,easy_vel,normal_enemy,normal_vel,hard_enemy,hard_vel
 
     if easy_enemy != []:
         for loc in easy_enemy:
-            loc[1] = loc[1] + easy_vel
+            if loc[2] == 1:
+                vel = easy_vel * 2
+            else:
+                vel = easy_vel
+            loc[1] = loc[1] + vel
             if loc[1] > display_height:
                 easy_enemy.remove(loc)
                 player_hp = player_hp -1#Losses life if spaceship gets past the end
@@ -762,10 +790,15 @@ def game_loop():
 
             black_hole = []
             for x in range(num_black_hole):
-                print(num_black_hole, "hi")
                 loc = []
-                loc.append(random.randrange(0.05*display_width,0.92*display_width))
-                loc.append(random.randrange(0.3*display_height,0.8*display_height))
+                x_loc = random.randrange(0.05*display_width,0.92*display_width)
+                y_loc = random.randrange(0.3*display_height,0.8*display_height)
+                if len(black_hole)>2:
+                    while black_hole[-1][0] + 0.15 * display_width > x_loc > black_hole[-1][0] - 0.15 * display_width or black_hole[-2][0] + 0.15 * display_width > x_loc > black_hole[-2][0] - 0.15 * display_width or black_hole[-1][1] + 0.1 * display_width > y_loc > black_hole[-1][1] - 0.1 * display_width or black_hole[-2][1] + 0.1 * display_width > y_loc > black_hole[-2][1] - 0.10 * display_width:
+                            x_loc = random.randrange(display_width * 0.05, display_width * 0.92)
+                            y_loc = random.randrange(0.3*display_height,0.8*display_height)
+                loc.append(x_loc)
+                loc.append(y_loc)
                 black_hole.append(loc)
             create_wave = False
 
