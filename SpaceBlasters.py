@@ -363,6 +363,47 @@ def hard_enemies(x,y, lives = 2):
     else:
         pygame.draw.circle(gameDisplay,red,(x,y),int(enemy_easy_height/2.5))
 
+def beam_enemies(x,y,lives = 1,fire_time = 0):
+    x = int(x)
+    y = int(y)
+    partx = int(beam_enemy_width /2)#16->8
+    party = int(beam_enemy_height /2)#32->16
+
+    #Left Engine Flames
+    pygame.draw.polygon(gameDisplay,blue,((x-int(partx*0.5),y-int(party*0.625)),(x-int(partx*0.375),y-int(party*0.75)),(x-int(partx*0.375),y-int(party*0.8125)),
+                        (x-int(partx*0.5),y-int(party*0.9375)),(x-int(partx*0.625),y-int(party*0.8125)),(x-int(partx*0.625),y-int(party*0.75))))
+
+    #Right Engine Flames
+    pygame.draw.polygon(gameDisplay,blue,((x+int(partx*0.5),y-int(party*0.625)),(x+int(partx*0.375),y-int(party*0.75)),(x+int(partx*0.375),y-int(party*0.8125)),
+                        (x+int(partx*0.5),y-int(party*0.9375)),(x+int(partx*0.625),y-int(party*0.8125)),(x+int(partx*0.625),y-int(party*0.75))))
+
+    pygame.draw.polygon(gameDisplay,violet,((x-int(partx*0.125),y+int(party*0.125)),(x-int(partx*0.625),(y+int(party*0.4375))),(x,int(y+party)),(x+int(partx*0.125),int(y+party)),(x+int(partx*0.625),(y+int(party*0.4375))),(x+int(partx*0.125),y+int(party*0.125)),
+                                            (x+int(partx*0.25),y+int(party*0.125)),(x+int(partx*0.5),y+int(party*0.1875)),(x+int(partx*0.75),y+int(party*0.0625)),(x+int(partx*0.875),y-int(party*0.0625)),(x+int(partx*0.875),y-int(party*0.4375)),(x+int(partx*0.75),y-int(party*0.5625)),#Top Right Red
+                                            (x+int(partx*0.375),y-int(party*0.5625)),(x+int(partx*0.5),y-int(party*0.6875)),(x+int(partx*0.25),y-int(party*0.6875)),(x+int(partx*0.25),y-int(party*0.875)),(x+int(partx*0.125),y-int(party*0.9375)),#reflection
+                                            (x-int(partx*0.125),y-int(party*0.9375)),(x-int(partx*0.25),y-int(party*0.875)),(x-int(partx*0.25),y-int(party*0.6875)),(x-int(partx*0.5),y-int(party*0.6875)),(x-int(partx*0.375),y-int(party*0.5625)),(x-int(partx*0.75),y-int(party*0.5625)),
+                                            (x-int(partx*0.875),y-int(party*0.4375)),(x-int(partx*0.875),y-int(party*0.0625)),(x-int(partx*0.75),y+int(party*0.0625)),(x-int(partx*0.5),y+int(party*0.1875)),(x-int(partx*0.25),y+int(party*0.125))))
+    #Arrow
+    pygame.draw.polygon(gameDisplay,light_black,((x-int(partx*0.125),y+int(party*0.125)),(x-int(partx*0.625),(y+int(party*0.4375))),(x,int(y+party)),(x+int(partx*0.125),int(y+party)),(x+int(partx*0.625),(y+int(party*0.4375))),(x+int(partx*0.125),y+int(party*0.125))))
+
+    #Left Right Red Lines
+    pygame.draw.line(gameDisplay, dark_red, (x+int(partx*0.125),y), (x+int(partx*0.375),y+int(party*0.1875)), int(party*0.125))
+    pygame.draw.line(gameDisplay, dark_red, (x-int(partx*0.125),y), (x-int(partx*0.375),y+int(party*0.1875)), int(party*0.125))
+    pygame.draw.rect(gameDisplay,light_black,((x-int(partx*0.125),y-int(party*0.75),int(partx*0.375),int(party*0.75))))
+
+
+    #Beam Firing
+    if fire_time >= 1:
+        pygame.draw.line(gameDisplay, dark_red, (x+int(partx*0.125),y), (x+int(partx*0.625),y+int(party*0.4325)), int(party*0.125))
+        pygame.draw.line(gameDisplay, dark_red, (x-int(partx*0.125),y), (x-int(partx*0.625),y+int(party*0.4325)), int(party*0.125))
+
+    if fire_time == 2:
+        pygame.draw.line(gameDisplay, dark_red, (x+int(partx*0.625),y+int(party*0.4325)), (x+int(partx*0.375),y+int(party*0.75)), int(party*0.125))
+        pygame.draw.line(gameDisplay, dark_red, (x-int(partx*0.625),y+int(party*0.4325)), (x-int(partx*0.375),y+int(party*0.75)), int(party*0.125))
+
+    if fire_time == 3:
+        pygame.draw.line(gameDisplay, dark_red, (x+int(partx*0.625),y+int(party*0.4325)), (x+int(partx*0),y+int(party)), int(party*0.125))
+        pygame.draw.line(gameDisplay, dark_red, (x-int(partx*0.625),y+int(party*0.4325)), (x-int(partx*0),y+int(party)), int(party*0.125))
+
 #Draws the players laser shots
 def fire(list):
     for loc in list:
@@ -512,6 +553,13 @@ def level_display(level):
             pygame.draw.rect(gameDisplay,blue,(200,535,laser_width,laser_height))
             text = med_font.render("->", True, red)
             gameDisplay.blit(text, [235,470])
+        elif level == 5:
+            beam_enemies(505, 175)
+            speed = "Slow"
+            rate = "Very Slow"
+            lives = 1
+            unique = "Fires Beam Lasers"
+
 
         if level != 4:
             text = medbig_font.render("New Enemy: ->", True, red)
@@ -578,16 +626,17 @@ def create_enemies(level, wave):
     enemy_waves = []
     enemies = []
     num_enemy = 0#Total Number of enemies
-    next_enemy = 0#Type of enemies 0-Easy, 1- Normal, 2-Hard
+    next_enemy = 0#Type of enemies 0-Easy, 1- Normal, 2-Hard, 3-Beam
 
     easy_num = []#Level 1 enemies
     normal_num = []#Level 2 enemies
     hard_num = []#Level 3 enemies
+    beam_num = []#Level 5 enemies
 
     black_hole = []#Level 4 Stage Hazard
     num_black_hole = 0
 
-    lives = [2,1,2]
+    lives = [2,1,2,1]
 
     if level == 1:
         easy_num = [1,2,2,3,3,3,4,4,4,5,5,5,6,6,7]#Number of enemies per wave
@@ -599,13 +648,20 @@ def create_enemies(level, wave):
         normal_num = [0,0,1,0,1,0,1,0,2,1,2,1,2,1,2,2]
         hard_num =   [1,1,1,2,1,2,2,3,1,2,2,3,2,3,3,3]
     elif level == 4:
-        easy_num =   [1,0,1,1,1,2,1,2,1,2,1,1,2,2,1,2]
-        normal_num = [0,1,1,1,2,1,1,2,2,1,2,1,2,1,2,2]
-        hard_num =   [1,1,0,1,1,1,2,1,1,2,2,3,2,3,3,3]
+        easy_num =   [1,1,0,1,0,2,1,1,2,0,3,1,2,2,1,2]
+        normal_num = [0,1,2,1,1,1,2,1,3,2,0,1,1,2,2,2]
+        hard_num =   [1,1,1,1,2,1,1,2,0,3,2,3,2,1,2,2]
         black_hole = [7,7,7,8,8,8,9,9,9,10,10,10,11,11,11,12]
+    elif level == 5:
+        easy_num =   [0,1,0,0,1,1,0,0,1,2,1,1,2,2,1,2]
+        normal_num = [1,0,1,0,1,0,1,0,2,1,2,1,2,2,2,1]
+        hard_num =   [0,1,0,1,1,1,1,2,1,2,2,2,1,1,2,2]
+        black_hole = [3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8]
+        beam_num =   [1,1,1,0,2,1,2,1,2,2,1,2,2,2,2,3]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
+    enemy_waves.append(hard_num)
     enemy_waves.append(hard_num)
 
     if black_hole != []:
@@ -632,11 +688,15 @@ def create_enemies(level, wave):
                 location.append(x_loc)
                 location.append(y_loc)
                 location.append(lives[next_enemy])#Have to change this when adding normal_minions
+                if next_enemy == 3:#Beam Enemies
+                    location.append(2)
+                else:
+                    location.append(0)
                 random_enemy.append(location)#Add easy_enemy to list
                 row_enemy.append(location)
                 num_enemy = num_enemy + 1
 
-            next_enemy = next_enemy + 1
+            next_enemy = next_enemy + 1#
         enemies.append(random_enemy)
     print(enemies)
 
@@ -705,11 +765,11 @@ def game_loop():
     laser_width = 7#originally 5
     laser_height = 20
 
-    level = 4
+    level = 5
     display_level = True
     wave = 1
     create_wave = True
-    waves_per_level = [15,16,16,16]
+    waves_per_level = [15,16,16,16,16]
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
     enemy_fire = 0
@@ -737,6 +797,13 @@ def game_loop():
     black_hole = []
     global black_hole_height
     black_hole_height = 20
+
+    global beam_enemy_height
+    global beam_enemy_width
+    beam_enemy_height = 64
+    beam_enemy_width = 32
+    beam_vel = 1
+    beam_rate_fire = 60
 
     while not game_exit:
         for event in pygame.event.get():#print(event)
