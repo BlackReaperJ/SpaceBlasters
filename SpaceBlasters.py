@@ -506,7 +506,6 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
                     enemies[2].remove(loc)
                 break
 
-        print(i,len(enemies[2]))
         if i > len(enemies[2]):
             continue
 
@@ -641,7 +640,7 @@ def level_display(level):
             unique = "Fires Beam Lasers"
 
 
-        if level != 4:
+        if level != 4 and level != 6:
             text = medbig_font.render("New Enemy: ->", True, red)
             gameDisplay.blit(text, [150,140])
             message_to_screen("Enemy Statistics",blue,-100,"medium")
@@ -653,6 +652,18 @@ def level_display(level):
             gameDisplay.blit(text, [50,430])
             text = med_font.render("Unique: " +str(unique), True, red)
             gameDisplay.blit(text, [50,500])
+        elif level == 6:
+            text = medbig_font.render("Boss Approaches", True, red)
+            gameDisplay.blit(text, [150,140])
+            message_to_screen("Enemy Statistics",blue,-100,"medium")
+            text = med_font.render("Moves Left and Right" + speed, True, red)
+            gameDisplay.blit(text, [150,290])
+            text = med_font.render("Shoots Beams and Lasers"+rate, True, red)
+            gameDisplay.blit(text, [150,360])
+            text = med_font.render("Has 100 Lives"+rate, True, red)
+            gameDisplay.blit(text, [150,430])
+            text = med_font.render("Good Luck" +str(unique), True, red)
+            gameDisplay.blit(text, [150,500])
         else:
             text = medbig_font .render("New Stage Hazard: ->", True, red)
             gameDisplay.blit(text, [100,140])
@@ -733,11 +744,11 @@ def create_enemies(level, wave):
         hard_num =   [1,1,1,1,2,1,1,2,0,3,2,3,2,1,2,2]
         black_hole = [7,7,7,8,8,8,9,9,9,10,10,10,11,11,11,12]
     elif level == 5:
-        easy_num =   [0,1,0,0,1,1,0,0,1,2,1,1,2,2,1,2]
-        normal_num = [1,0,1,0,1,0,1,0,2,1,2,1,2,2,2,1]
-        hard_num =   [0,1,0,1,1,1,1,2,1,2,2,2,1,1,2,2]
+        easy_num =   [0,1,1,0,1,1,0,1,1,2,1,1,2,2,1,2]
+        normal_num = [1,0,0,1,1,0,1,0,2,1,2,1,2,2,2,1]
+        hard_num =   [0,1,1,1,1,1,1,2,1,2,2,2,1,1,2,2]
         black_hole = [3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8]
-        beam_num =   [1,1,1,0,2,1,2,1,2,2,1,2,2,2,2,3]
+        beam_num =   [1,1,1,1,1,2,2,1,2,2,1,2,2,2,2,3]
 
     enemy_waves.append(easy_num)
     enemy_waves.append(normal_num)
@@ -845,11 +856,17 @@ def game_loop():
 
     score = 0
 
-    player_hp = 10
+    player_hp = 15
     space_ship_x = display_width * 0.5
     space_ship_y = display_height * 0.99
     move_x = 0
     move_y = 0
+
+    #stupid commenting system
+    key_right = False
+    key_left = False
+    key_up = False
+    key_down = False
 
     list_fire = []
     vel_shot = 5
@@ -865,11 +882,11 @@ def game_loop():
     beam_width = 15
     beam_height = 20#Speed of the shot
 
-    level = 5
+    level = 6
     display_level = True
     wave = 1
     create_wave = True
-    waves_per_level = [15,16,16,16,16]
+    waves_per_level = [15,16,16,16,16,1]
     enemies = [] # [0] = easy_enemies, [1] = normal_enemies
 
     enemy_fire = 0
@@ -913,21 +930,25 @@ def game_loop():
                 quit()
 
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    move_x = 0
-                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    move_y = 0
+                if event.key == pygame.K_LEFT:
+                    key_left = False
+                elif event.key == pygame.K_RIGHT:
+                    key_right = False
+                elif event.key == pygame.K_UP:
+                    key_up = False
+                elif event.key == pygame.K_DOWN:
+                    key_down = False
 
             #When the key is pressed
             if event.type == pygame.KEYDOWN:#Moves object
                 if event.key == pygame.K_LEFT:
-                    move_x = -5
+                    key_left = True
                 elif event.key == pygame.K_RIGHT :
-                    move_x = 5
+                    key_right = True
                 elif event.key == pygame.K_UP:
-                    move_y = -5
+                    key_up = True
                 elif event.key == pygame.K_DOWN :
-                    move_y = 5
+                    key_down = True
                 elif event.key == pygame.K_p:
                     pause()
                 if event.key == pygame.K_SPACE :#Fires lasers
@@ -940,7 +961,7 @@ def game_loop():
 
         if display_level:
             wave = 1
-            player_hp = 10
+            player_hp = 15
             list_fire = []
             move_x = 0
             move_y = 0
@@ -971,6 +992,8 @@ def game_loop():
             create_wave = False
 
         #Moves Spaceship
+        move_x = -5 if key_left else 5 if key_right else 0
+        move_y = -5 if key_up else 5 if key_down else 0
         space_ship_x += move_x
         space_ship_y += move_y
 
