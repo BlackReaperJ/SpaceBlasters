@@ -454,6 +454,20 @@ def create_boss(boss_enemy,lives = 100,fire_time = 0):
     pygame.draw.rect(gameDisplay,light_black,(x-int(partx*1.375),y + int(party*0.125), int(partx*0.1875),int(party * 0.625)))
     pygame.draw.rect(gameDisplay,light_black,(x+int(partx*1.375),y + int(party*0.125), int(partx*0.1875),int(party * 0.625)))
 
+#Moves Boss and Displays Life of Boss
+def boss_stuff(boss_enemy,x):
+    if x < boss_enemy[0]:
+        boss_enemy[0] = boss_enemy[0] -2
+    elif x > boss_enemy[0]:
+        boss_enemy[0] = boss_enemy[0] + 2
+
+    if boss_enemy[2] >= 50:
+        pygame.draw.rect(gameDisplay,green,(650,15,15,int(boss_enemy[2]*3.65)))
+    elif boss_enemy[2] >= 25:
+        pygame.draw.rect(gameDisplay,yellow,(650,15,15,int(boss_enemy[2]*3.65)))
+    else:
+        pygame.draw.rect(gameDisplay,dark_red,(650,15,15,int(boss_enemy[2]*3.65)))
+
 #Draws the players laser shots
 def fire(list):
     for loc in list:
@@ -1159,6 +1173,7 @@ def game_loop():
 
         if boss == True:
             create_boss(boss_enemy)
+            boss_stuff(boss_enemy,space_ship_x)
 
         if enemy_fire % easy_rate_fire == 0:#Firing for easy enemies
             for loc in enemies[0]:
