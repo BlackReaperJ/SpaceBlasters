@@ -547,12 +547,20 @@ def enemy_fires(enemy):
         pygame.draw.rect(gameDisplay,red,(loc[0],loc[1],laser_width,laser_height))
 
 #Enemy laser collision for the player
-def enemy_fire_collision(player,enemy_list_fire,player_hp):
+def enemy_fire_collision(x,y,enemy_list_fire,player_hp):
     for fire in enemy_list_fire:
         laser = pygame.draw.rect(gameDisplay,red,(fire[0],fire[1],laser_width,laser_height))
-        if player.colliderect(laser):
+        tip = pygame.draw.polygon(gameDisplay,light_black,((x+7,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+10,y-30),(x+18,y-28),(x+18,y-30),(x+12,y-38)))
+        body = pygame.draw.rect(gameDisplay,light_black,((x-3),(y-20),20,26))
+        left_wing = pygame.draw.rect(gameDisplay,light_black,((x-22),(y-3),20,9))
+        left_wing_up = pygame.draw.rect(gameDisplay,light_black,((x-14),(y-10),14,7))
+        right_wing = pygame.draw.rect(gameDisplay,light_black,((x+15),(y-3),20,9))
+        right_wing_up = pygame.draw.rect(gameDisplay,light_black,((x+14),(y-10),14,7))
+
+        if tip.colliderect(laser) or body.colliderect(laser) or right_wing.colliderect(laser) or right_wing_up.colliderect(laser) or left_wing.colliderect(laser) or left_wing_up.colliderect(laser):
             player_hp = player_hp - 1
             enemy_list_fire.remove(fire)
+
     return player_hp
 
 #Draws the beam lasers and destorys player lasers and ship
@@ -1060,6 +1068,7 @@ def game_loop():
 
         fire(list_fire)
         score = player_fire_collision(list_fire,enemies,score,enemy_list_fire)
+        player_hp = enemy_fire_collision(space_ship_x,space_ship_y,enemy_list_fire,player_hp)
 
         # enemies: [0] = easy_enemies, [1] = normal_enemies, [2] = hard_enemies
         # [3] = beam_enemies, [4] = boss
@@ -1094,7 +1103,7 @@ def game_loop():
         if enemy_fire % boss_rate_fire == 0 and boss == True:#Firing for Boss enemies
                 loc_fire = []
                 loc_fire.append(random.randrange(int(boss_enemy[0]-enemy_boss_width*1.5),int(boss_enemy[0]+enemy_boss_width*1.5)))
-                loc_fire.append(boss_enemy[1])
+                loc_fire.append(boss_enemy[1]+30)
                 enemy_list_fire.append(loc_fire)
 
         for loc in enemy_list_fire:
@@ -1107,7 +1116,6 @@ def game_loop():
         beam_fires(enemies[3],list_fire,player,player_hp)
 
         enemies, player_hp,score = player_collision(player,enemies,player_hp,score)
-        player_hp = enemy_fire_collision(player,enemy_list_fire,player_hp)
 
         if player_hp <= 0:
             gameover(score)
