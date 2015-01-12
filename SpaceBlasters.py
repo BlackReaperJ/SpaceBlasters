@@ -564,23 +564,99 @@ def enemy_fire_collision(x,y,enemy_list_fire,player_hp):
     return player_hp
 
 #Draws the beam lasers and destorys player lasers and ship
-def beam_fires(beam_enemy,list_fire,player,player_hp):
+def beam_fires(x,y,beam_enemy,list_fire,player_hp,boss,boss_enemy,boss_beam):
+
+    tip = pygame.draw.polygon(gameDisplay,light_black,((x+7,y-50),(x+1,y-37),(x-5,y-30),(x-5,y-28),(x+3,y-30),(x+10,y-30),(x+18,y-28),(x+18,y-30),(x+12,y-38)))
+    body = pygame.draw.rect(gameDisplay,light_black,((x-3),(y-20),20,26))
+    left_wing = pygame.draw.rect(gameDisplay,light_black,((x-22),(y-3),20,9))
+    left_wing_up = pygame.draw.rect(gameDisplay,light_black,((x-14),(y-10),14,7))
+    right_wing = pygame.draw.rect(gameDisplay,light_black,((x+15),(y-3),20,9))
+    right_wing_up = pygame.draw.rect(gameDisplay,light_black,((x+14),(y-10),14,7))
+
     for loc in beam_enemy:
         if loc[3] == 3:
             beam = pygame.draw.rect(gameDisplay,light_yellow,(loc[0] - int(beam_width * 0.5),loc[1]+int(enemy_beam_height*0.5),beam_width,int(loc[4] * beam_height)))
             loc[4] = loc[4] + 1
 
-            if loc[1] + int(loc[4] * beam_height) > display_height or player.colliderect(beam):
+            if loc[1] + int(loc[4] * beam_height) > display_height:
                 loc[3] = 0
                 loc[4] = 1
 
-            if player.colliderect(beam):
+            if tip.colliderect(beam) or body.colliderect(beam) or left_wing.colliderect(beam) or left_wing_up.colliderect(beam) or right_wing.colliderect(beam) or right_wing_up.colliderect(beam):
                 player_hp = player_hp - 1
+                loc[3] = 0
+                loc[4] = 1
 
             for fire in list_fire:
                 laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
                 if laser.colliderect(beam):
                     list_fire.remove(fire)
+
+    print(boss_beam)
+    if boss == True:
+        if boss_beam[0][0] == 3:
+            beam = pygame.draw.rect(gameDisplay,light_yellow,(boss_enemy[0] - int(beam_width * 0.5),boss_enemy[1]+int(enemy_beam_height*0.5),beam_width,int(boss_beam[0][1] * beam_height)))
+            boss_beam[0][1] = boss_beam[0][1] + 1
+
+            if boss_enemy[1] + int(boss_beam[0][1] * beam_height) > display_height:
+                boss_beam[0][0] = 0
+                boss_beam[0][1] = 1
+
+            if tip.colliderect(beam) or body.colliderect(beam) or left_wing.colliderect(beam) or left_wing_up.colliderect(beam) or right_wing.colliderect(beam) or right_wing_up.colliderect(beam):
+                player_hp = player_hp - 1
+                boss_beam[0][0] = 0
+                boss_beam[0][1] = 1
+
+            for fire in list_fire:
+                laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
+                if laser.colliderect(beam):
+                    list_fire.remove(fire)
+
+        if boss_beam[1][0] == 3:
+            beam = pygame.draw.rect(gameDisplay,light_yellow,(boss_enemy[0] - int(beam_width * 2.6),boss_enemy[1]+int(enemy_beam_height*0.5),int(beam_width*0.4),int(boss_beam[1][1] * beam_height)))
+            beam2 = pygame.draw.rect(gameDisplay,light_yellow,(boss_enemy[0] + int(beam_width * 2.6),boss_enemy[1]+int(enemy_beam_height*0.5),int(beam_width*0.4),int(boss_beam[1][1] * beam_height)))
+
+            boss_beam[1][1] = boss_beam[1][1] + 1.5
+
+            if boss_enemy[1] + int(boss_beam[1][1] * beam_height) > display_height:
+                boss_beam[1][0] = 0
+                boss_beam[1][1] = 1
+
+            if tip.colliderect(beam) or body.colliderect(beam) or left_wing.colliderect(beam) or left_wing_up.colliderect(beam) or right_wing.colliderect(beam) or right_wing_up.colliderect(beam) or tip.colliderect(beam2) or body.colliderect(beam) or left_wing.colliderect(beam2) or left_wing_up.colliderect(beam2) or right_wing.colliderect(beam2) or right_wing_up.colliderect(beam2):
+                player_hp = player_hp - 1
+                boss_beam[1][0] = 0
+                boss_beam[1][1] = 1
+
+            for fire in list_fire:
+                laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
+                if laser.colliderect(beam) or laser.colliderect(beam2):
+                    list_fire.remove(fire)
+
+        if boss_beam[2][0] == 3:
+            beam = pygame.draw.rect(gameDisplay,light_yellow,(boss_enemy[0] - int(beam_width * 5.1),boss_enemy[1]+int(enemy_beam_height*0.5),int(beam_width),int(boss_beam[2][1] * beam_height)))
+            beam2 = pygame.draw.rect(gameDisplay,light_yellow,(boss_enemy[0] + int(beam_width * 4.4),boss_enemy[1]+int(enemy_beam_height*0.5),int(beam_width),int(boss_beam[2][1] * beam_height)))
+
+            boss_beam[2][1] = boss_beam[2][1] + 0.7
+
+            if boss_enemy[1] + int(boss_beam[2][1] * beam_height) > display_height:
+                boss_beam[2][2] = boss_beam[2][2] + 1
+
+            if boss_beam[2][2] == 150:
+                boss_beam[2][0] = 0
+                boss_beam[2][1] = 1
+                boss_beam[2][2] = 0
+
+            if tip.colliderect(beam) or body.colliderect(beam) or left_wing.colliderect(beam) or left_wing_up.colliderect(beam) or right_wing.colliderect(beam) or right_wing_up.colliderect(beam) or tip.colliderect(beam2) or body.colliderect(beam) or left_wing.colliderect(beam2) or left_wing_up.colliderect(beam2) or right_wing.colliderect(beam2) or right_wing_up.colliderect(beam2):
+                player_hp = player_hp - 1
+                boss_beam[2][0] = 0
+                boss_beam[2][1] = 1
+
+            for fire in list_fire:
+                laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
+                if laser.colliderect(beam) or laser.colliderect(beam2):
+                    list_fire.remove(fire)
+
+    return player_hp
 
 def ai_move(hard_enemy,list_fire):
     for fire in list_fire:
@@ -914,7 +990,7 @@ def game_loop():
 
     global beam_width
     global beam_height
-    beam_width = 15
+    beam_width = 17
     beam_height = 20#Speed of the shot
 
     level = 6
@@ -965,6 +1041,10 @@ def game_loop():
     enemy_boss_width = 64
     enemy_boss_height = 128
     boss_rate_fire = 25
+    boss_beam_main = 300
+    boss_beam_small = 50
+    boss_beam_wing = 125
+    boss_beam = [[0,0],[0,0],[0,0,0]]#0 - main, 1- small, 2- wing
 
     while not game_exit:
         for event in pygame.event.get():#print(event)
@@ -1069,6 +1149,7 @@ def game_loop():
         fire(list_fire)
         score = player_fire_collision(list_fire,enemies,score,enemy_list_fire)
         player_hp = enemy_fire_collision(space_ship_x,space_ship_y,enemy_list_fire,player_hp)
+        player_hp = beam_fires(space_ship_x,space_ship_y,enemies[3],list_fire,player_hp,boss,boss_enemy,boss_beam)
 
         # enemies: [0] = easy_enemies, [1] = normal_enemies, [2] = hard_enemies
         # [3] = beam_enemies, [4] = boss
@@ -1106,6 +1187,18 @@ def game_loop():
                 loc_fire.append(boss_enemy[1]+30)
                 enemy_list_fire.append(loc_fire)
 
+        if enemy_fire % boss_beam_main == 0 and boss == True:
+                if boss_beam[0][0] != 3:
+                    boss_beam[0][0] = (boss_beam[0][0] + 1) % 4
+
+        if enemy_fire % boss_beam_small == 0 and boss == True:
+                if boss_beam[1][0] != 3:
+                    boss_beam[1][0] = (boss_beam[1][0] + 1) % 4
+
+        if enemy_fire % boss_beam_wing == 0 and boss == True:
+                if boss_beam[2][0] != 3:
+                    boss_beam[2][0] = (boss_beam[2][0] + 1) % 4
+
         for loc in enemy_list_fire:
             loc[1] = loc[1] + easy_vel_shot
             if loc[1] > display_height:
@@ -1113,7 +1206,6 @@ def game_loop():
 
         enemy_fires(enemy_list_fire)
         player = space_ship(space_ship_x,space_ship_y)
-        beam_fires(enemies[3],list_fire,player,player_hp)
 
         enemies, player_hp,score = player_collision(player,enemies,player_hp,score)
 
