@@ -193,48 +193,6 @@ def game_intro():
         pygame.display.update()
         clock.tick(15)#Frames per second, great graphics low fps, meh graphics high mid fps
 
-#Win the Game Screen
-def you_win(score):
-    game_win = True
-    name = ""
-    type = ""
-    num = 1
-    symbols = "!@#$%^&*():<>:?\/.,~\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    while game_win:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-            if event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_BACKSPACE and len(name) > 0:
-                    name = name[:-1]
-                elif event.key == pygame.K_SPACE:
-                    name = name + " "
-                elif pygame.key.name(event.key) in symbols:
-                    name = name + pygame.key.name(event.key)
-
-        num = num +1
-        if num % 20 >= 10:
-            type = "|"
-        else:
-            type = ""
-
-        gameDisplay.fill(black)
-        game_stars()
-        message_to_screen("You Have Won!!",red,y_displace =-100,size = "large")
-        message_to_screen("Your total score is: " + str(score),blue,0,"medium")
-        message_to_screen("Enter your name:"+ str(name) + type, blue, 60, "medium")
-
-        #Make Buttons, pygame does not have buttons
-        button("Play Again", 12, 600, button_width, button_height,green, light_green, action = "play")
-        button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
-        button("Submit Score", 362, 600, button_width, button_height, blue, light_blue,action = "submit")
-        button("Quit", 537, 600, button_width, button_height, red, light_red,action = "quit")
-
-        pygame.display.update()
-        clock.tick(20)
-
 #Game Over screen of the game
 def gameover(score):
     game_over = True
@@ -464,6 +422,14 @@ def create_boss(boss_enemy,lives = 100,fire_time = 0):
     partx = int(enemy_boss_width /2)#16->8
     party = int(enemy_boss_height /2)#32->16
 
+    #Left Engine Flames
+    pygame.draw.polygon(gameDisplay,blue,((x-int(partx*0.5),y-int(party*0.625)),(x-int(partx*0.375),y-int(party*0.75)),(x-int(partx*0.375),y-int(party*0.8125)),
+                        (x-int(partx*0.5),y-int(party*0.9375)),(x-int(partx*0.625),y-int(party*0.8125)),(x-int(partx*0.625),y-int(party*0.75))))
+
+    #Right Engine Flames
+    pygame.draw.polygon(gameDisplay,blue,((x+int(partx*0.5),y-int(party*0.625)),(x+int(partx*0.375),y-int(party*0.75)),(x+int(partx*0.375),y-int(party*0.8125)),
+                        (x+int(partx*0.5),y-int(party*0.9375)),(x+int(partx*0.625),y-int(party*0.8125)),(x+int(partx*0.625),y-int(party*0.75))))
+
     #Main Body
     pygame.draw.polygon(gameDisplay,light_black,((x-int(partx*2.375),y+int(party*0.125)),(x-int(partx*2.625),y+int(party*0.125)),(x-int(partx*3.125),(y+int(party*0.4375))),(x-int(partx*2.5),int(y+party)),(x-int(partx*2.375),int(y+party)),(x-int(partx*1.875),(y+int(party*0.4375))),#Left Arrow
                                                 (x-int(partx*0.875),y+int(party*0.5625)),(x,y+int(party*0.9375)),(x+int(partx*0.875),y+int(party*0.5625)),
@@ -508,7 +474,7 @@ def fire(list):
         pygame.draw.rect(gameDisplay,blue,(loc[0]+ int(laser_width/2),loc[1]-50-laser_height,laser_width,laser_height))
 
 #Players Laser Collision for enemy laser and enemies
-def player_fire_collision(list_fire,enemies,score,enemy_list_fire,boss,boss_enemy):
+def player_fire_collision(list_fire,enemies,score,enemy_list_fire):
     for fire in list_fire:#Player laser and Enemy Laser collision
         laser = pygame.draw.rect(gameDisplay,blue,(fire[0]+ int(laser_width/2),fire[1]-50-laser_height,laser_width,laser_height))
         for enemy_fire in enemy_list_fire:
@@ -525,8 +491,8 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire,boss,boss_enem
             if enemy.colliderect(laser):
                 list_fire.remove(fire)
                 loc[2] = loc[2] - 1
-                score =  score + 100
                 if loc[2] <= 0:
+                    score =  score + 100
                     enemies[0].remove(loc)
                 break#need to break if a laser overlaps with 2 enemies at the same location
 
@@ -545,8 +511,8 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire,boss,boss_enem
             if enemy.colliderect(laser):
                 list_fire.remove(fire)
                 loc[2] = loc[2] - 1
-                score =  score + 100
                 if loc[2] <= 0:
+                    score =  score + 100
                     enemies[1].remove(loc)
                 break
 
@@ -559,8 +525,8 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire,boss,boss_enem
             if enemy.colliderect(laser):
                 list_fire.remove(fire)
                 loc[2] = loc[2] - 1
-                score =  score + 100
                 if loc[2] <= 0:
+                    score =  score + 100
                     enemies[2].remove(loc)
                 break
 
@@ -579,31 +545,13 @@ def player_fire_collision(list_fire,enemies,score,enemy_list_fire,boss,boss_enem
             if enemy.colliderect(laser):
                 list_fire.remove(fire)
                 loc[2] = loc[2] - 1
-                score =  score + 100
                 if loc[2] <= 0:
+                    score =  score + 100
                     enemies[3].remove(loc)
                 break
 
         if i > len(enemies[3]):
             continue
-
-        if boss == True:
-
-            print(boss_enemy)
-            x = int(boss_enemy[0])
-            y = int(boss_enemy[1])
-            partx = int(enemy_boss_width/2)
-            party = int(enemy_boss_height/2)
-            enemy = pygame.draw.polygon(gameDisplay,light_black,((x-int(partx*2.375),y+int(party*0.125)),(x-int(partx*2.625),y+int(party*0.125)),(x-int(partx*3.125),(y+int(party*0.4375))),(x-int(partx*2.5),int(y+party)),(x-int(partx*2.375),int(y+party)),(x-int(partx*1.875),(y+int(party*0.4375))),#Left Arrow
-                                                (x-int(partx*0.875),y+int(party*0.5625)),(x,y+int(party*0.9375)),(x+int(partx*0.875),y+int(party*0.5625)),
-                                                (x+int(partx*1.875),(y+int(party*0.4375))),(x+int(partx*2.5),int(y+party)),(x+int(partx*2.625),int(y+party)),(x+int(partx*3.125),(y+int(party*0.4375))),(x+int(partx*2.625),y+int(party*0.125)),(x+int(partx*2.375),y+int(party*0.125))))
-            if enemy.colliderect(laser):
-                list_fire.remove(fire)
-                boss_enemy[2] = boss_enemy[2] - 1
-                score =  score + 100
-                if boss_enemy[2] <= 0:
-                    you_win(score)
-                break
 
     return score
 
@@ -658,6 +606,7 @@ def beam_fires(x,y,beam_enemy,list_fire,player_hp,boss,boss_enemy,boss_beam):
                 if laser.colliderect(beam):
                     list_fire.remove(fire)
 
+    print(boss_beam)
     if boss == True:
         if boss_beam[0][0] == 3:
             beam = pygame.draw.rect(gameDisplay,light_yellow,(boss_enemy[0] - int(beam_width * 0.5),boss_enemy[1]+int(enemy_beam_height*0.5),beam_width,int(boss_beam[0][1] * beam_height)))
@@ -706,7 +655,7 @@ def beam_fires(x,y,beam_enemy,list_fire,player_hp,boss,boss_enemy,boss_beam):
             if boss_enemy[1] + int(boss_beam[2][1] * beam_height) > display_height:
                 boss_beam[2][2] = boss_beam[2][2] + 1
 
-            if boss_beam[2][2] == 250:
+            if boss_beam[2][2] == 150:
                 boss_beam[2][0] = 0
                 boss_beam[2][1] = 1
                 boss_beam[2][2] = 0
@@ -1212,7 +1161,7 @@ def game_loop():
         create_stage_hazard(black_hole)
 
         fire(list_fire)
-        score = player_fire_collision(list_fire,enemies,score,enemy_list_fire,boss,boss_enemy)
+        score = player_fire_collision(list_fire,enemies,score,enemy_list_fire)
         player_hp = enemy_fire_collision(space_ship_x,space_ship_y,enemy_list_fire,player_hp)
         player_hp = beam_fires(space_ship_x,space_ship_y,enemies[3],list_fire,player_hp,boss,boss_enemy,boss_beam)
 
