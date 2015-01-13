@@ -1,6 +1,7 @@
 #Makes a SpaceBlasters Games
 import pygame
 import random
+from operator import itemgetter
 
 pygame.init()#Initialize the modules in pygame
 
@@ -84,7 +85,7 @@ def message_to_screen(msg,color, y_displace = 0, size = "small"):
     gameDisplay.blit(text_surf, text_rect)
 
 #Creates a Button
-def button(text, x, y, width, height, inactive_color, active_color, action= None):
+def button(text, x, y, width, height, inactive_color, active_color, action= None, score = 0, names = ""):
     #3rd param(xLoc,yLoc,width,height)
     cur = pygame.mouse.get_pos()# gets x,y of mouse location in a tuple
     click = pygame.mouse.get_pressed()#Gets clicks of the mouse
@@ -97,8 +98,8 @@ def button(text, x, y, width, height, inactive_color, active_color, action= None
                 quit()
             elif action == "controls":
                 game_controls()
-            elif action == "highscore":
-                pass
+            elif action == "submit":
+                high_scores(score, names)
             elif action == "play":
                 game_loop()
             elif action == "main":
@@ -134,8 +135,87 @@ def pause():
 
         clock.tick(5)
 
+def high_scores(score = 0, name = " "):
+    for i in range(2):
+        clock.tick(15)
+
+    game_score = True
+    highscores = []
+
+    while True:
+        try:
+            fr = open('HighScores.txt','r')#'r', read file
+            text = fr.read()
+            words = text.split()
+
+            line = []
+            i = 0
+            for word in words:
+                if i % 2 == 1:
+                    line.append(int(word))
+                    highscores.append(line)
+                    line = []
+                else:
+                    line.append(word)
+                i+=1
+            fr.close()
+            break
+        except FileNotFoundError:
+            highscores = [['Ace',250000],['Julius',200000],['Kirito',150000],['JPunisher',100000],['God',75000],
+                          ['Jack',50000],['GreasyDeafGuy',25000],['Mrs.Schuli',10000],['Jason',7500],['Player1',5000]]
+            break
+
+    if len(highscores) != 10:
+        highscores = [['Ace',250000],['Julius',200000],['Kirito',150000],['JPunisher',100000],['God',75000],
+                      ['Jack',50000],['GreasyDeafGuy',25000],['Mrs.Schuli',10000],['Jason',7500],['Player1',5000]]
+
+    highscores.append([name,score])
+    #itemgetter orders the list
+    highscores = sorted(highscores,key = itemgetter(1),reverse = True)
+
+    fw = open("HighScores.txt", 'w')#open(), 1st param file name, 2nd param write,read
+    for i in range(10):
+        fw.write(highscores[i][0] + "                  " + str(highscores[i][1])+"\n")
+
+    fw.close()
+
+    while game_score:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        gameDisplay.fill(black)
+        game_stars()
+        message_to_screen("HighScores",blue,y_displace =-300,size = "large")
+
+        for i in range(10):
+            text = med_font.render(str(i+1) + ". " + highscores[i][0] , True, red)
+            if i ==9:
+              gameDisplay.blit(text,[32,i * 50 + 90])
+            else:
+                gameDisplay.blit(text,[50,i * 50 + 90])
+            text = med_font.render(str(highscores[i][1]), True, red)
+            gameDisplay.blit(text,[500,i * 50 + 90])
+
+        button_width = 150
+        button_height = 75
+
+        #Make Buttons, pygame does not have buttons
+        button("Play", 12, 600, button_width, button_height,green, light_green, action = "play")
+        button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
+        button("Controls", 362, 600, button_width, button_height, blue, light_blue,action = "controls")
+        button("Quit", 537, 600, button_width, button_height, red, light_red,action = "quit")
+
+        pygame.display.update()
+        clock.tick(10)
+
+
 #Creates a game_controls title page for the game
 def game_controls():
+    for i in range(2):
+        clock.tick(15)
+
     game_cont = True
     while game_cont:
 
@@ -152,7 +232,7 @@ def game_controls():
         message_to_screen("Pause: P",blue,-60,"medium")
         message_to_screen("Kill Enemies to Increase Score!",blue,0,"medium")
         message_to_screen("Hp Restored After Each Level",blue,60,"medium")
-        message_to_screen("Beat lvl 10 to win the game",blue,120,"medium")
+        message_to_screen("Beat level 6 to win the game",blue,120,"medium")
 
         button_width = 150
         button_height = 75
@@ -160,7 +240,7 @@ def game_controls():
         #Make Buttons, pygame does not have buttons
         button("Play", 12, 600, button_width, button_height,green, light_green, action = "play")
         button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
-        button("High Scores", 362, 600, button_width, button_height, blue, light_blue,action = "highscore")
+        button("High Scores", 362, 600, button_width, button_height, blue, light_blue,action = "submit")
         button("Quit", 537, 600, button_width, button_height, red, light_red,action = "quit")
 
         pygame.display.update()
@@ -187,14 +267,14 @@ def game_intro():
         #Make Buttons, pygame does not have buttons
         button("Play", display_width/2 - 0.5* button_width, 225, button_width, button_height,green, light_green, action = "play")
         button("Controls", display_width/2 - 0.5* button_width, 335, button_width, button_height, yellow, light_yellow, action = "controls")
-        button("High Scores", display_width/2 - 0.5* button_width, 445, button_width, button_height, blue, light_blue,action = "highscore")
+        button("High Scores", display_width/2 - 0.5* button_width, 445, button_width, button_height, blue, light_blue,action = "submit")
         button("Quit", display_width/2 - 0.5* button_width, 555, button_width, button_height, red, light_red,action = "quit")
 
         pygame.display.update()
         clock.tick(15)#Frames per second, great graphics low fps, meh graphics high mid fps
 
 #Win the Game Screen
-def you_win(score):
+def you_win(scores):
     game_win = True
     name = ""
     type = ""
@@ -223,20 +303,20 @@ def you_win(score):
         gameDisplay.fill(black)
         game_stars()
         message_to_screen("You Have Won!!",red,y_displace =-100,size = "large")
-        message_to_screen("Your total score is: " + str(score),blue,0,"medium")
+        message_to_screen("Your total score is: " + str(scores),blue,0,"medium")
         message_to_screen("Enter your name:"+ str(name) + type, blue, 60, "medium")
 
         #Make Buttons, pygame does not have buttons
         button("Play Again", 12, 600, button_width, button_height,green, light_green, action = "play")
         button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
-        button("Submit Score", 362, 600, button_width, button_height, blue, light_blue,action = "submit")
+        button("Submit Score", 362, 600, button_width, button_height, blue, light_blue,action = "submit", score = scores, names = name)
         button("Quit", 537, 600, button_width, button_height, red, light_red,action = "quit")
 
         pygame.display.update()
         clock.tick(20)
 
 #Game Over screen of the game
-def gameover(score):
+def gameover(scores):
     game_over = True
     name = ""
     type = ""
@@ -265,13 +345,13 @@ def gameover(score):
         gameDisplay.fill(black)
         game_stars()
         message_to_screen("Game Over!!",red,y_displace =-100,size = "large")
-        message_to_screen("Your total score is: " + str(score),blue,0,"medium")
+        message_to_screen("Your total score is: " + str(scores),blue,0,"medium")
         message_to_screen("Enter your name:"+ str(name) + type, blue, 60, "medium")
 
         #Make Buttons, pygame does not have buttons
         button("Play Again", 12, 600, button_width, button_height,green, light_green, action = "play")
         button("Main", 187, 600, button_width, button_height, yellow, light_yellow, action = "main")
-        button("Submit Score", 362, 600, button_width, button_height, blue, light_blue,action = "submit")
+        button("Submit Score", 362, 600, button_width, button_height, blue, light_blue,action = "submit",score = scores, names = name)
         button("Quit", 537, 600, button_width, button_height, red, light_red,action = "quit")
 
         pygame.display.update()
@@ -798,7 +878,6 @@ def level_display(level):
             lives = 3
             unique = "Fires Beam Lasers"
 
-
         if level != 4 and level != 6:
             text = medbig_font.render("New Enemy: ->", True, red)
             gameDisplay.blit(text, [150,140])
@@ -853,9 +932,23 @@ def black_hole_destroy(black_hole,list_fire):
                 break
 
 #Creates stage hazards for the game
-def create_stage_hazard(black_hole):
+def create_stage_hazard(black_hole,list_fire,boss):
     for loc in black_hole:
         part = black_hole_height#Radius Black Hole
+        if boss == True:
+            for fire in list_fire:
+
+                if fire[1] >= loc[1] and fire[0] < loc[0]:
+                    loc[0] = loc[0] -2
+                    break
+                elif fire[1] >= loc[1] and fire[0] > loc[0]:
+                    loc[0] = loc[0] +2
+                    break
+                '''
+                elif fire[1] < loc[1]:
+                    loc[1] = loc[1] -2
+                '''
+
         x = loc[0]
         y = loc[1]
         pygame.draw.circle(gameDisplay,dark_red,(x,y),black_hole_height)
@@ -1106,8 +1199,8 @@ def game_loop():
     enemy_boss_width = 64
     enemy_boss_height = 128
     boss_rate_fire = 25
-    boss_beam_main = 300
-    boss_beam_small = 50
+    boss_beam_main = 50
+    boss_beam_small = 75
     boss_beam_wing = 125
     boss_beam = [[0,0],[0,0],[0,0,0]]#0 - main, 1- small, 2- wing
 
@@ -1177,7 +1270,17 @@ def game_loop():
                 loc.append(x_loc)
                 loc.append(y_loc)
                 black_hole.append(loc)
+
+            if boss == True:
+                loc = []
+                x_loc = random.randrange(0.05*display_width,0.92*display_width)
+                y_loc = int(display_height*0.5)
+                loc.append(x_loc)
+                loc.append(y_loc)
+                black_hole.append(loc)
             create_wave = False
+
+
 
         #Moves Spaceship
         move_x = -5 if key_left else 5 if key_right else 0
@@ -1209,7 +1312,7 @@ def game_loop():
         display_score(score)
         health_bar(player_hp)
         black_hole_destroy(black_hole,list_fire)
-        create_stage_hazard(black_hole)
+        create_stage_hazard(black_hole,list_fire,boss)
 
         fire(list_fire)
         score = player_fire_collision(list_fire,enemies,score,enemy_list_fire,boss,boss_enemy)
